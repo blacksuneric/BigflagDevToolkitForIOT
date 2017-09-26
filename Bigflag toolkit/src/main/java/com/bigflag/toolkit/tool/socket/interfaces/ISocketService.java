@@ -29,6 +29,7 @@ public interface ISocketService {
 	public boolean startToListenTCP(int port);
 	public boolean stopListenTCP();
 	public boolean registerSocketDataReceiver(ISocketDataReceiver socketDataReceiver);
+	public boolean removeISocketDataReceiver(ISocketDataReceiver socketDataReceiver);
 	public ISocketSession findSocketSession(long sessionID);
 	public ISocketSession findSocketSession(String sessionKey);
 	public boolean broadcastDataToAllSession(byte[] data);

@@ -1,9 +1,17 @@
 /**
  * 
  */
-package com.bigflag.toolkit.tool.socket.impl;
+package com.bigflag.toolkit.tool.socket.impl.mina;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.logging.LoggingFilter;
+import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
@@ -31,13 +39,29 @@ import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
  */
 public class SocketSerivceMinaImpl implements ISocketService {
 
+	private NioSocketAcceptor acceptor;
+	private MinaTCPHandler minaTCPHandler=new MinaTCPHandler();
+
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#startToListenTCP(int)
 	 */
 	@Override
 	public boolean startToListenTCP(int port) {
-		// TODO Auto-generated method stub
-		return false;
+		acceptor = new NioSocketAcceptor();
+
+		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
+		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaProtocolCodecFactory()));
+
+		acceptor.setHandler(minaTCPHandler);
+		acceptor.getSessionConfig().setReadBufferSize(2048);
+		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 1800);
+		acceptor.setCloseOnDeactivation(true);
+		try {
+			acceptor.bind(new InetSocketAddress(port));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -45,8 +69,8 @@ public class SocketSerivceMinaImpl implements ISocketService {
 	 */
 	@Override
 	public boolean stopListenTCP() {
-		// TODO Auto-generated method stub
-		return false;
+		acceptor.unbind();
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -54,8 +78,7 @@ public class SocketSerivceMinaImpl implements ISocketService {
 	 */
 	@Override
 	public boolean registerSocketDataReceiver(ISocketDataReceiver socketDataReceiver) {
-		// TODO Auto-generated method stub
-		return false;
+		return minaTCPHandler.addISocketDataReceiver(socketDataReceiver);
 	}
 
 	/* (non-Javadoc)
@@ -101,6 +124,14 @@ public class SocketSerivceMinaImpl implements ISocketService {
 	public boolean closeSession(long sessionID) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#removeISocketDataReceiver(com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver)
+	 */
+	@Override
+	public boolean removeISocketDataReceiver(ISocketDataReceiver socketDataReceiver) {
+		return minaTCPHandler.removeISocketDataReceiver(socketDataReceiver);
 	}
 
 }
