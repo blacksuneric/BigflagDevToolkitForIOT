@@ -26,13 +26,15 @@ import java.util.List;
  *         Create at:2017年9月26日 下午1:13:43
  */
 public interface ISocketService {
-	public boolean startToListenTCP(int port);
+	public boolean startToListenTCP(int port,ISocketService.OnReceiveData onReceiveData);
 	public boolean stopListenTCP();
-	public boolean registerSocketDataReceiver(ISocketDataReceiver socketDataReceiver);
-	public boolean removeISocketDataReceiver(ISocketDataReceiver socketDataReceiver);
 	public ISocketSession findSocketSession(long sessionID);
 	public ISocketSession findSocketSession(String sessionKey);
 	public boolean broadcastDataToAllSession(byte[] data);
 	public List<ISocketSession> getAllSocketSessions();
 	public boolean closeSession(long sessionID);
+	
+	public interface OnReceiveData{
+		public void onReceiveData(Object data);
+	}
 }

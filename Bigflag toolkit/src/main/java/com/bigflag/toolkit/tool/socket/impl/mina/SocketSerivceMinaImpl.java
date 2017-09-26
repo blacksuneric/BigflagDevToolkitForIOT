@@ -7,13 +7,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
@@ -40,27 +38,28 @@ import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 public class SocketSerivceMinaImpl implements ISocketService {
 
 	private NioSocketAcceptor acceptor;
-	private MinaTCPHandler minaTCPHandler=new MinaTCPHandler();
 
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#startToListenTCP(int)
 	 */
 	@Override
-	public boolean startToListenTCP(int port) {
+	public boolean startToListenTCP(int port,ISocketService.OnReceiveData onReceiveData) {
 		acceptor = new NioSocketAcceptor();
 
 		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
 		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaProtocolCodecFactory()));
 
-		acceptor.setHandler(minaTCPHandler);
+		acceptor.setHandler(new MinaTCPHandler(onReceiveData));
 		acceptor.getSessionConfig().setReadBufferSize(2048);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 1800);
 		acceptor.setCloseOnDeactivation(true);
 		try {
 			acceptor.bind(new InetSocketAddress(port));
+			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -73,13 +72,6 @@ public class SocketSerivceMinaImpl implements ISocketService {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#registerSocketDataReceiver(com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver)
-	 */
-	@Override
-	public boolean registerSocketDataReceiver(ISocketDataReceiver socketDataReceiver) {
-		return minaTCPHandler.addISocketDataReceiver(socketDataReceiver);
-	}
 
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#findSocketSession(long)
@@ -126,12 +118,5 @@ public class SocketSerivceMinaImpl implements ISocketService {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService#removeISocketDataReceiver(com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver)
-	 */
-	@Override
-	public boolean removeISocketDataReceiver(ISocketDataReceiver socketDataReceiver) {
-		return minaTCPHandler.removeISocketDataReceiver(socketDataReceiver);
-	}
 
 }

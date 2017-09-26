@@ -1,30 +1,25 @@
 package com.bigflag.toolkit.tool.socket.impl.mina;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketDataReceiver;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnReceiveData;
 
 public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
-	private Set<ISocketDataReceiver> socketDataReceivers=new CopyOnWriteArraySet<ISocketDataReceiver>();
 	
-	public boolean addISocketDataReceiver(ISocketDataReceiver socketDataReceiver)
-	{
-		return this.socketDataReceivers.add(socketDataReceiver);
+	private ISocketService.OnReceiveData onReceiveDataListener;
+	
+	/**
+	 * @param onReceiveDataListener
+	 */
+	public MinaTCPHandler(OnReceiveData onReceiveDataListener) {
+		super();
+		this.onReceiveDataListener = onReceiveDataListener;
 	}
-	
-	public boolean removeISocketDataReceiver(ISocketDataReceiver socketDataReceiver)
-	{
-		return this.socketDataReceivers.remove(socketDataReceiver);
-	}
-	
+
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
 		// TODO Auto-generated method stub
@@ -42,9 +37,9 @@ public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 	public void messageReceived(IoSession session, final Object message) throws Exception {
 		// TODO Auto-generated method stub
 		super.messageReceived(session, message);
-		for(ISocketDataReceiver socketDataReceiver:socketDataReceivers)
+		if(onReceiveDataListener!=null)
 		{
-			socketDataReceiver.handleData((byte[])message);
+			onReceiveDataListener.onReceiveData(message);
 		}
 		
 	}
