@@ -7,17 +7,23 @@ import org.apache.mina.core.session.IoSession;
 
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnReceiveData;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionClosed;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionCreated;
 
 public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 	
 	private ISocketService.OnReceiveData onReceiveDataListener;
+	private ISocketService.OnSessionCreated onSessionCreated;
+	private ISocketService.OnSessionClosed onSessionClosed;
 	
 	/**
 	 * @param onReceiveDataListener
 	 */
-	public MinaTCPHandler(OnReceiveData onReceiveDataListener) {
+	public MinaTCPHandler(OnReceiveData onReceiveDataListener,OnSessionCreated onSessionCreated,OnSessionClosed onSessionClosed) {
 		super();
 		this.onReceiveDataListener = onReceiveDataListener;
+		this.onSessionCreated=onSessionCreated;
+		this.onSessionClosed=onSessionClosed;
 	}
 
 	@Override
@@ -54,13 +60,20 @@ public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 	public void sessionClosed(IoSession session) throws Exception {
 		// TODO Auto-generated method stub
 		super.sessionClosed(session);
-
+		if(onSessionClosed!=null)
+		{
+			onSessionClosed.onSessionClosed(new MinaSocketSession(session));
+		}
 	}
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
 		// TODO Auto-generated method stub
 		super.sessionCreated(session);
+		if(onSessionCreated!=null)
+		{
+			onSessionCreated.onSessionCreated(new MinaSocketSession(session));
+		}
 	}
 
 	@Override

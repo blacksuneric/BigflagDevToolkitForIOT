@@ -3,6 +3,7 @@
  */
 package com.bigflag.toolkit.tool.socket.interfaces;
 
+import java.util.Collection;
 import java.util.List;
 
 /***
@@ -26,15 +27,29 @@ import java.util.List;
  *         Create at:2017年9月26日 下午1:13:43
  */
 public interface ISocketService {
-	public boolean startToListenTCP(int port,ISocketService.OnReceiveData onReceiveData);
+	public boolean startToListenTCP(
+			int port
+			,ISocketService.OnReceiveData onReceiveData
+			,ISocketService.OnSessionCreated onSessionCreated
+			,ISocketService.OnSessionClosed onSessionClosed);
 	public boolean stopListenTCP();
 	public ISocketSession findSocketSession(long sessionID);
 	public ISocketSession findSocketSession(String sessionKey);
 	public boolean broadcastDataToAllSession(byte[] data);
-	public List<ISocketSession> getAllSocketSessions();
+	public Collection<ISocketSession> getAllSocketSessions();
 	public boolean closeSession(long sessionID);
+	public boolean addSocketSession(ISocketSession socketSession);
+	public boolean removeSocketSession(ISocketSession socketSession);
 	
 	public interface OnReceiveData{
 		public void onReceiveData(Object data);
+	}
+	
+	public interface OnSessionCreated{
+		public void onSessionCreated(ISocketSession socketSession);
+	}
+	
+	public interface OnSessionClosed{
+		public void onSessionClosed(ISocketSession socketSession);
 	}
 }
