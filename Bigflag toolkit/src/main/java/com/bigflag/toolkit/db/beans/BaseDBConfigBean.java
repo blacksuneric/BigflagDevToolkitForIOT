@@ -24,7 +24,7 @@ import java.net.Inet4Address;
  *		   mail:     34223022@qq.com<br>
  *         Create at:下午11:42:04 
  */
-public class BaseBDConfigBean {
+public class BaseDBConfigBean {
 	private final String driver;
 	private final String userName;
 	private final String pwd;
@@ -46,7 +46,7 @@ public class BaseBDConfigBean {
 	 * @param connectionTimeout
 	 * @param connectionIdelTime
 	 */
-	private BaseBDConfigBean(Builder builder) {
+	private BaseDBConfigBean(Builder builder) {
 		super();
 		this.driver = builder.driver;
 		this.userName = builder.userName;
@@ -72,9 +72,9 @@ public class BaseBDConfigBean {
 		private int connectionIdelTime;
 		private String jdbcURL;
 		
-		public BaseBDConfigBean build()
+		public BaseDBConfigBean build()
 		{
-			return new BaseBDConfigBean(this);
+			return new BaseDBConfigBean(this);
 		}
 		
 		public Builder setJdbcURL(String jdbcURL) {

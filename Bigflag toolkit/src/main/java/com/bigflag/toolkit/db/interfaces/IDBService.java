@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.bigflag.toolkit.db.beans.BaseBDConfigBean;
+import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
 
 /**
@@ -104,7 +104,7 @@ public interface IDBService {
 	 * 
 	 * @param dbConfigBean
 	 */
-	boolean initConnection(BaseBDConfigBean dbConfigBean);
+	boolean initConnection(BaseDBConfigBean dbConfigBean);
 	
 	Connection getDBConnection() throws SQLException;
 	

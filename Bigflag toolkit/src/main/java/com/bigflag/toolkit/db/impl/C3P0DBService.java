@@ -23,7 +23,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
-import com.bigflag.toolkit.db.beans.BaseBDConfigBean;
+import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
 import com.bigflag.toolkit.db.enums.DBDataStatus;
 import com.bigflag.toolkit.db.interfaces.IDBService;
@@ -381,7 +381,7 @@ public class C3P0DBService implements IDBService {
 	 * .toolkit.db.beans.BaseBDConfigBean)
 	 */
 	@Override
-	public boolean initConnection(BaseBDConfigBean dbConfigBean) {
+	public boolean initConnection(BaseDBConfigBean dbConfigBean) {
 		ComboPooledDataSource cpds = new ComboPooledDataSource();
 		try {
 			cpds.setDriverClass(dbConfigBean.getDriver());

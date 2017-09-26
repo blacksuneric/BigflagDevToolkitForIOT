@@ -33,4 +33,11 @@ public class LockerDBBean extends BaseDBBean {
 		this.lockerAddress=lockerAddress;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		return "LockerDBBean [lockerCode=" + lockerCode + ", lockerAddress=" + lockerAddress + "]";
+	}
+	
+	
 }
