@@ -3,6 +3,9 @@
  */
 package com.bigflag.toolkit.iot.devicehandler;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import com.bigflag.toolkit.iot.interfaces.IIOTDeviceIdentifier;
 import com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor;
 
@@ -28,6 +31,7 @@ import com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor;
 public abstract class AbstractIOTDeviceProcessor {
 	private final IIOTDeviceIdentifier deviceIdentifier;
 	private final IIOTDeviceProcessor  deviceProcessor;
+	private Executor executor=Executors.newCachedThreadPool();
 	/**
 	 * @param deviceIdentifier
 	 * @param deviceProcessor
@@ -40,10 +44,13 @@ public abstract class AbstractIOTDeviceProcessor {
 	
 	public void processIOTData(long sessionID,byte[] data)
 	{
-		if(this.deviceIdentifier.isThisDevice(data))
-		{
-			this.deviceProcessor.processIOTData(sessionID,data);
-		}
+		executor.execute(()->{
+			if(this.deviceIdentifier.isThisDevice(data))
+			{
+				this.deviceProcessor.processIOTData(sessionID,data);
+			}
+		});
+		
 	}
 	
 	
