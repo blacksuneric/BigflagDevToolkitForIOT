@@ -1,5 +1,8 @@
 package com.bigflag.toolkit.ioc;
 
+import org.apache.commons.lang3.NotImplementedException;
+
+import com.bigflag.toolkit.db.impl.C3P0DBService;
 import com.bigflag.toolkit.db.interfaces.IDBService;
 import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
 import com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter;
@@ -7,6 +10,8 @@ import com.bigflag.toolkit.tool.cache.impl.RedisCacheImpl;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpToolService;
+import com.bigflag.toolkit.tool.socket.impl.mina.SocketSerivceMinaImpl;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -31,9 +36,11 @@ public class ServiceFactory {
 	private static Object locker = new Object();
 	private static ServiceFactory instance;
 	
-	private final static DefaultIOTHandlerCenter defaultIOTHandlerCenter=new DefaultIOTHandlerCenter();
-	private final static DefaultHttpPostToolImpl defaultHttpPostToolImpl=new DefaultHttpPostToolImpl();
-	private final static RedisCacheImpl defaultCacheImpl=new RedisCacheImpl();
+	private final static IDBService defaultDBService=new C3P0DBService();
+	private final static IIOTHandlerCenter defaultIOTHandlerCenter=new DefaultIOTHandlerCenter();
+	private final static IHttpToolService defaultHttpPostToolImpl=new DefaultHttpPostToolImpl();
+	private final static ICacheToolService defaultCacheImpl=new RedisCacheImpl();
+	private final static ISocketService defaultSocketService=new SocketSerivceMinaImpl();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -49,12 +56,17 @@ public class ServiceFactory {
 	
 	public IDBService getDBService(String serviceKey)
 	{
-		return null;
+		throw new NotImplementedException("");
 	}
 	
 	public IHttpToolService getHttpToolService(String serviceKey)
 	{
-		return null;
+		throw new NotImplementedException("");
+	}
+	
+	public IDBService getDefaultDBService()
+	{
+		return defaultDBService;
 	}
 	
 	public IIOTHandlerCenter getDefaultIOTHandlerCenter()
@@ -70,6 +82,11 @@ public class ServiceFactory {
 	public ICacheToolService getDefaultCacheToolService()
 	{
 		return defaultCacheImpl;
+	}
+	
+	public ISocketService getDefaultSocketService()
+	{
+		return defaultSocketService;
 	}
 
 }
