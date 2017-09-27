@@ -10,6 +10,8 @@ import com.bigflag.toolkit.tool.cache.impl.RedisCacheImpl;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpToolService;
+import com.bigflag.toolkit.tool.mq.impl.RabbitMQService;
+import com.bigflag.toolkit.tool.mq.interfaces.IMQToolService;
 import com.bigflag.toolkit.tool.socket.impl.mina.SocketSerivceMinaImpl;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
 
@@ -41,6 +43,7 @@ public class ServiceFactory {
 	private final static IHttpToolService defaultHttpPostToolImpl=new DefaultHttpPostToolImpl();
 	private final static ICacheToolService defaultCacheImpl=new RedisCacheImpl();
 	private final static ISocketService defaultSocketService=new SocketSerivceMinaImpl();
+	private final static IMQToolService defaultMQService=new RabbitMQService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -87,6 +90,11 @@ public class ServiceFactory {
 	public ISocketService getDefaultSocketService()
 	{
 		return defaultSocketService;
+	}
+	
+	public IMQToolService getDefaultMQService()
+	{
+		return defaultMQService;
 	}
 
 }

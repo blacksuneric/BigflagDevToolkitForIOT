@@ -3,7 +3,10 @@
  */
 package com.bigflag.toolkit.tool.mq.interfaces;
 
+import java.io.IOException;
+
 import com.bigflag.toolkit.tool.mq.beans.BaseMQConfigBean;
+import com.bigflag.toolkit.tool.mq.enums.MQSendType;
 
 /***
  * 
@@ -28,7 +31,11 @@ import com.bigflag.toolkit.tool.mq.beans.BaseMQConfigBean;
 public interface IMQToolService {
 	public boolean isInit();
 	public boolean connectServer(BaseMQConfigBean configBean);
-	public boolean registerInterestingEvent(String eventKey);
-	public boolean sendMsg(String routineKey,String msg);
-	public boolean processMsg(String eventKey,String msg);
+	public boolean registerInterestingSubject(String subject,String routingKey,OnReceiveMsg onReceiveMsg) throws IOException;
+	public boolean sendMsg(String subject,String routingKey,byte[] msg, MQSendType mqSendType) throws IOException;
+	public boolean closeConnection();
+	
+	public interface OnReceiveMsg{
+		public void onReceiveMsg(byte[] msg);
+	}
 }

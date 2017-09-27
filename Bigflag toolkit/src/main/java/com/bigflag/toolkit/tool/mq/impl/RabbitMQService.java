@@ -3,8 +3,24 @@
  */
 package com.bigflag.toolkit.tool.mq.impl;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
+import com.bigflag.toolkit.exception.MQServiceNotInitException;
 import com.bigflag.toolkit.tool.mq.beans.BaseMQConfigBean;
+import com.bigflag.toolkit.tool.mq.enums.MQSendType;
 import com.bigflag.toolkit.tool.mq.interfaces.IMQToolService;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.AMQP.Queue.DeclareOk;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ShutdownSignalException;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -26,14 +42,25 @@ import com.bigflag.toolkit.tool.mq.interfaces.IMQToolService;
  *         Create at: 2017年9月27日 下午7:13:15 
  */
 public class RabbitMQService implements IMQToolService {
+	private Map<String,Channel> sendChannels=new ConcurrentHashMap<String, Channel>();
+	private Map<String,Channel> receiveChannels=new ConcurrentHashMap<String, Channel>();
+	private ConnectionFactory factory;
+	private Connection connection;
+	private boolean isInit;
+	private void checkServiceInit()
+	{
+		if(!isInit())
+		{
+			throw new MQServiceNotInitException();
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#isInit()
 	 */
 	@Override
 	public boolean isInit() {
-		// TODO Auto-generated method stub
-		return false;
+		return isInit;
 	}
 
 	/* (non-Javadoc)
@@ -41,33 +68,113 @@ public class RabbitMQService implements IMQToolService {
 	 */
 	@Override
 	public boolean connectServer(BaseMQConfigBean configBean) {
-		// TODO Auto-generated method stub
-		return false;
+		factory = new ConnectionFactory();
+		factory.setUsername(configBean.getUserName());
+		factory.setPassword(configBean.getPwd());
+		factory.setHost(configBean.getServerAddress());
+		factory.setPort(configBean.getPort());
+		factory.setAutomaticRecoveryEnabled(true);
+		try {
+			connection=factory.newConnection();
+			isInit=true;
+			return true;
+		} catch (IOException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			isInit=false;
+			return false;
+		}
 	}
 
 	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#registerInterestingEvent(java.lang.String)
+	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#registerInterestingSubject(java.lang.String, java.lang.String, com.bigflag.toolkit.tool.mq.interfaces.IMQToolService.OnReceiveMsg)
 	 */
 	@Override
-	public boolean registerInterestingEvent(String eventKey) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean registerInterestingSubject(String subject, String routingKey, OnReceiveMsg onReceiveMsg) throws IOException {
+		this.checkServiceInit();
+		Channel channel=this.receiveChannels.get((subject+routingKey).intern());
+		if(channel==null)
+		{
+			channel=connection.createChannel();
+			DeclareOk queueOk = channel.queueDeclare();
+			channel.queueBind(queueOk.getQueue(), subject, routingKey);
+			channel.basicConsume(queueOk.getQueue(), new Consumer() {
+				
+				@Override
+				public void handleShutdownSignal(String arg0, ShutdownSignalException arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void handleRecoverOk(String arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void handleDelivery(String arg0, Envelope arg1, BasicProperties arg2, byte[] msg) throws IOException {
+					if(onReceiveMsg!=null)
+					{
+						onReceiveMsg.onReceiveMsg(msg);
+					}
+				}
+				
+				@Override
+				public void handleConsumeOk(String arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void handleCancelOk(String arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void handleCancel(String arg0) throws IOException {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			this.receiveChannels.put((subject+routingKey).intern(),channel);
+		}
+		return true;
 	}
 
 	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#sendMsg(java.lang.String, java.lang.String)
+	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#sendMsg(java.lang.String, java.lang.String, byte[])
 	 */
 	@Override
-	public boolean sendMsg(String routineKey, String msg) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean sendMsg(String subject, String routingKey, byte[] msg,MQSendType mqSendType) throws IOException {
+		this.checkServiceInit();
+		Channel channel=this.sendChannels.get((subject+routingKey).intern());
+		if(channel==null)
+		{
+			channel=connection.createChannel();
+			switch(mqSendType){
+				case DIRECT:
+					channel.exchangeDeclare(subject, BuiltinExchangeType.DIRECT);
+					break;
+				case TOPICE:
+					channel.exchangeDeclare(subject, BuiltinExchangeType.TOPIC);
+					break;
+				case BROADCAST:
+					channel.exchangeDeclare(subject, BuiltinExchangeType.FANOUT);
+					break;
+			}
+			this.sendChannels.put((subject+routingKey).intern(),channel);
+		}
+		channel.basicPublish(subject, routingKey, null, msg);
+		return true;
 	}
 
 	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#processMsg(java.lang.String, java.lang.String)
+	 * @see com.bigflag.toolkit.tool.mq.interfaces.IMQToolService#closeConnection()
 	 */
 	@Override
-	public boolean processMsg(String eventKey, String msg) {
+	public boolean closeConnection() {
 		// TODO Auto-generated method stub
 		return false;
 	}
