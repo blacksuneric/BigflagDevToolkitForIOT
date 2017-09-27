@@ -5,10 +5,9 @@ package com.bigflag.toolkit.db.interfaces;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
-import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
+import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -41,21 +40,16 @@ public interface IDBService {
 	 */
 	boolean update(BaseDBBean baseDBBean);
 
-	/**
-	 * @param baseDBBean
-	 * @return 
-	 */
-	String saveOrUpdate(BaseDBBean baseDBBean);
 
 	/**
 	 * @param baseDBBean
 	 */
-	void deleteSoft(BaseDBBean baseDBBean);
+	boolean deleteSoft(BaseDBBean baseDBBean);
 
 	/**
 	 * @param baseDBBean
 	 */
-	void deleteHard(BaseDBBean baseDBBean);
+	boolean deleteHard(BaseDBBean baseDBBean);
 
 	/**
 	 * @param baseDBBean
@@ -68,13 +62,7 @@ public interface IDBService {
 	 * @param attributes
 	 * @return
 	 */
-	boolean findWithAttributesAndLoad(String[] attributes);
-
-	/**
-	 * @param attributes
-	 * @return 
-	 */
-	List<BaseDBBean> findDBBeansWithAttributes(String[] attributes);
+	boolean findWithAttributesAndLoad(BaseDBBean baseDBBean,String[] attributes);
 
 	/**
 	 * @param baseDBBean

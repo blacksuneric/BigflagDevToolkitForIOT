@@ -8,23 +8,25 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
-import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
+import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
 import com.bigflag.toolkit.db.enums.DBDataStatus;
 import com.bigflag.toolkit.db.interfaces.IDBService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -62,9 +64,9 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public String saveAndReturnUUID(BaseDBBean baseDBBean) {
-		String uuid=UUID.randomUUID().toString();
+		String uuid = UUID.randomUUID().toString();
 		baseDBBean.setUuid(uuid);
-		this.verifyBaseDBBean(baseDBBean);
+		this.verifyBaseDBBean(baseDBBean,true);
 		try {
 			Connection conn = this.getDBConnection(baseDBBean);
 			String tableName = this.getClassName(baseDBBean);
@@ -86,7 +88,7 @@ public class C3P0DBService implements IDBService {
 			sbSQL.append(BaseDBBean.resverdAttributes[6]).append(",");
 			sbSQL.append(BaseDBBean.resverdAttributes[7]);
 
-			sbSQL.append(") values(").append(StringUtils.repeat("?", ",", fileds.keySet().size()-1)).append(")");
+			sbSQL.append(") values(").append(StringUtils.repeat("?", ",", fileds.keySet().size() - 1)).append(")");
 			PreparedStatement stat = conn.prepareStatement(sbSQL.toString());
 			int index = 1;
 			for (String key : fileds.keySet()) {
@@ -96,12 +98,12 @@ public class C3P0DBService implements IDBService {
 				stat.setObject(index++, fileds.get(key));
 			}
 			stat.setObject(index++, uuid);
-			stat.setObject(index++, "createUserUUID");
-			stat.setObject(index++, "updateUserUUID");
-			stat.setObject(index++, "softDeleteUserUUID");
+			stat.setObject(index++, "");
+			stat.setObject(index++, "");
+			stat.setObject(index++, "");
 			stat.setObject(index++, DateTime.now().toDate());
-			stat.setObject(index++, DateTime.now().toDate());
-			stat.setObject(index++, DateTime.now().toDate());
+			stat.setObject(index++, null);
+			stat.setObject(index++, null);
 			stat.setObject(index++, DBDataStatus.NORMAL.name());
 			stat.execute();
 			return uuid;
@@ -121,9 +123,11 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean update(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean);
+		this.verifyBaseDBBean(baseDBBean,true);
+		Connection conn = null;
+		PreparedStatement stat = null;
 		try {
-			Connection conn = this.getDBConnection(baseDBBean);
+			conn = this.getDBConnection(baseDBBean);
 			String tableName = this.getClassName(baseDBBean);
 			StringBuilder sbSQL = new StringBuilder();
 			Map<String, Object> fileds = PropertyUtils.describe(baseDBBean);
@@ -144,7 +148,7 @@ public class C3P0DBService implements IDBService {
 			sbSQL.append(BaseDBBean.resverdAttributes[7]).append("=? ");
 
 			sbSQL.append(" where uuid=\"").append(baseDBBean.getUuid()).append("\"");
-			PreparedStatement stat = conn.prepareStatement(sbSQL.toString());
+			stat = conn.prepareStatement(sbSQL.toString());
 			int index = 1;
 			for (String key : fileds.keySet()) {
 				if (ArrayUtils.contains(BaseDBBean.resverdAttributes, key) || key.equalsIgnoreCase("class")) {
@@ -159,27 +163,26 @@ public class C3P0DBService implements IDBService {
 			stat.setObject(index++, baseDBBean.getCreateTime());
 			stat.setObject(index++, DateTime.now().toDate());
 			stat.setObject(index++, baseDBBean.getSoftDeleteTime());
-			stat.setObject(index++, baseDBBean.getDataStatus().name());
+			stat.setObject(index++, baseDBBean.getDataStatus());
 			return stat.execute();
 		} catch (SQLException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
+		}finally
+		{
+			try {
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.db.interfaces.IDBService#saveOrUpdate(com.bigflag
-	 * .toolkit.db.beans.BaseDBBean)
-	 */
-	@Override
-	public String saveOrUpdate(BaseDBBean baseDBBean) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -189,8 +192,35 @@ public class C3P0DBService implements IDBService {
 	 * .db.beans.BaseDBBean)
 	 */
 	@Override
-	public void deleteSoft(BaseDBBean baseDBBean) {
-		// TODO Auto-generated method stub
+	public boolean deleteSoft(BaseDBBean baseDBBean) {
+		this.verifyBaseDBBean(baseDBBean,true);
+		Connection conn = null;
+		PreparedStatement stat = null;
+		try {
+			conn = this.getDBConnection(baseDBBean);
+			String tableName = this.getClassName(baseDBBean);
+			StringBuilder sbSQL = new StringBuilder();
+			sbSQL.append("update ").append(tableName).append(" set dataStatus=?, softDeleteTime=? where uuid=?;");
+			stat = conn.prepareStatement(sbSQL.toString());
+			stat.setObject(1, DBDataStatus.SOFT_DELETED.name());
+			stat.setObject(2, DateTime.now().toDate());
+			stat.setObject(3, baseDBBean.getUuid());
+			return stat.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}finally
+		{
+			try {
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 
 	}
 
@@ -202,8 +232,33 @@ public class C3P0DBService implements IDBService {
 	 * .db.beans.BaseDBBean)
 	 */
 	@Override
-	public void deleteHard(BaseDBBean baseDBBean) {
-		// TODO Auto-generated method stub
+	public boolean deleteHard(BaseDBBean baseDBBean) {
+		this.verifyBaseDBBean(baseDBBean,true);
+		Connection conn = null;
+		PreparedStatement stat = null;
+		try {
+			conn = this.getDBConnection(baseDBBean);
+			String tableName = this.getClassName(baseDBBean);
+			StringBuilder sbSQL = new StringBuilder();
+			sbSQL.append("delete from ").append(tableName).append(" where uuid=?;");
+			stat = conn.prepareStatement(sbSQL.toString());
+			stat.setObject(1, baseDBBean.getUuid());
+			return stat.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}finally
+		{
+			try {
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 
 	}
 
@@ -216,9 +271,46 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean findAndLoad(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean);
-		
-		return false;
+		this.verifyBaseDBBean(baseDBBean,true);
+		Connection conn = null;
+		PreparedStatement stat = null;
+		ResultSet rs = null;
+		try {
+			conn = this.getDBConnection(baseDBBean);
+			String tableName = this.getClassName(baseDBBean);
+			StringBuilder sbSQL = new StringBuilder();
+			sbSQL.append("select * from ").append(tableName).append(" where uuid=? and dataStatus=? limit 0,1;");
+			stat = conn.prepareStatement(sbSQL.toString());
+			stat.setObject(1, baseDBBean.getUuid());
+			stat.setObject(2, DBDataStatus.NORMAL.name());
+			rs = stat.executeQuery();
+			ResultSetMetaData data = rs.getMetaData();
+			while (rs.next()) {
+				for (int i = 1; i <= data.getColumnCount(); i++) {
+					String columnName = data.getColumnLabel(i);
+					if (rs.getObject(i) == null) {
+						continue;
+					} else {
+						BeanUtils.setProperty(baseDBBean, columnName, rs.getObject(i));
+					}
+				}
+			}
+			return true;
+		} catch (SQLException | IllegalAccessException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				rs.close();
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
 	}
 
 	/*
@@ -229,23 +321,64 @@ public class C3P0DBService implements IDBService {
 	 * (java.lang.String[])
 	 */
 	@Override
-	public boolean findWithAttributesAndLoad(String[] attributes) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean findWithAttributesAndLoad(BaseDBBean baseDBBean,String[] attributes) {
+		this.verifyBaseDBBean(baseDBBean, false);
+		Connection conn = null;
+		PreparedStatement stat = null;
+		ResultSet rs = null;
+		try {
+			conn = this.getDBConnection(baseDBBean);
+			String tableName = this.getClassName(baseDBBean);
+			StringBuilder sbSQL = new StringBuilder();
+			sbSQL.append("select * from ").append(tableName).append(" where 1=1 ");
+			for(String attribute:attributes)
+			{
+				sbSQL.append(" and ").append(attribute).append(" = ?");
+			}
+			sbSQL.append(" and dataStatus=? limit 0,1;");
+			stat = conn.prepareStatement(sbSQL.toString());
+			for(int i=1;i<=attributes.length;i++)
+			{
+				stat.setObject(i, BeanUtils.getProperty(baseDBBean, attributes[i-1]));
+			}
+			stat.setObject(attributes.length+1, DBDataStatus.NORMAL.name());
+			rs = stat.executeQuery();
+			ResultSetMetaData data = rs.getMetaData();
+			while (rs.next()) {
+				for (int i = 1; i <= data.getColumnCount(); i++) {
+					String columnName = data.getColumnLabel(i);
+					if (rs.getObject(i) == null) {
+						continue;
+					} else {
+						BeanUtils.setProperty(baseDBBean, columnName, rs.getObject(i));
+					}
+				}
+			}
+			if(StringUtils.isNotBlank(baseDBBean.getUuid()))
+			{
+				return true;
+			}else
+			{
+				return false;
+			}
+		} catch (SQLException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				rs.close();
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.db.interfaces.IDBService#findDBBeansWithAttributes
-	 * (java.lang.String[])
-	 */
-	@Override
-	public List<BaseDBBean> findDBBeansWithAttributes(String[] attributes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -291,6 +424,14 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
+		}finally
+		{
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -316,6 +457,14 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
+		}finally
+		{
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -328,8 +477,10 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public void createTable(BaseDBBean baseDBBean) {
+		Connection conn=null;
+		Statement stat=null;
 		try {
-			Connection conn = this.getDBConnection(baseDBBean);
+			conn = this.getDBConnection(baseDBBean);
 			String tableName = this.getClassName(baseDBBean);
 			StringBuilder sbSQL = new StringBuilder();
 			StringBuilder sbDropTable = new StringBuilder();
@@ -345,19 +496,28 @@ public class C3P0DBService implements IDBService {
 					sbSQL.append(desc.getName()).append(" tinyint(1) DEFAULT NULL,");
 				} else if (desc.getPropertyType() == Date.class) {
 					sbSQL.append(desc.getName()).append(" datetime DEFAULT NULL,");
-				} else if(desc.getPropertyType()==DBDataStatus.class)
-				{
+				} else if (desc.getPropertyType() == DBDataStatus.class) {
 					sbSQL.append(desc.getName()).append(" varchar(255) COLLATE utf8_bin DEFAULT NULL,");
 				}
 			}
 			sbSQL.append("PRIMARY KEY (`id`))").append(" ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;");
 
-			Statement stat = conn.createStatement();
+			stat = conn.createStatement();
 			stat.execute(sbDropTable.toString());
 			stat.execute(sbSQL.toString());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally
+		{
+			try {
+				stat.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 
 	}
@@ -435,14 +595,11 @@ public class C3P0DBService implements IDBService {
 		}
 		return baseDBBean.getClass().getSimpleName();
 	}
-	
-	private void verifyBaseDBBean(BaseDBBean baseDBBean)
-	{
-		if(baseDBBean==null)
-		{
+
+	private void verifyBaseDBBean(BaseDBBean baseDBBean,boolean isCheckUUID) {
+		if (baseDBBean == null) {
 			throw new NullPointerException("baseDBBean is null");
-		}else if(!StringUtils.isNotBlank(baseDBBean.getUuid()))
-		{
+		} else if (isCheckUUID&&!StringUtils.isNotBlank(baseDBBean.getUuid())) {
 			throw new IllegalArgumentException("the db bean uuid cannot be empty");
 		}
 	}

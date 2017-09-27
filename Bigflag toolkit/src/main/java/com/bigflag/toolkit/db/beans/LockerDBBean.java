@@ -38,6 +38,4 @@ public class LockerDBBean extends BaseDBBean {
 	public String toString() {
 		return "LockerDBBean [lockerCode=" + lockerCode + ", lockerAddress=" + lockerAddress + "]";
 	}
-	
-	
 }

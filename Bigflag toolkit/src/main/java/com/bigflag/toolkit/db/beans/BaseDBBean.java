@@ -35,7 +35,7 @@ public class BaseDBBean {
 	private Date createTime;
 	private Date updateTime;
 	private Date softDeleteTime;
-	private DBDataStatus dataStatus;
+	private String dataStatus;
 	
 	public static String[] resverdAttributes=new String[]{
 													"uuid",
@@ -85,14 +85,6 @@ public class BaseDBBean {
 		dbService.update(this);
 	}
 	
-	public String saveOrUpdate() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.saveOrUpdate(this);
-	}
 	
 	public void deleteSoft() throws DBServiceNotInitException
 	{
@@ -118,6 +110,7 @@ public class BaseDBBean {
 		{
 			throw new DBServiceNotInitException();
 		}
+		this.setUuid(uuid);
 		return dbService.findAndLoad(this);
 	}
 	
@@ -127,16 +120,7 @@ public class BaseDBBean {
 		{
 			throw new DBServiceNotInitException();
 		}
-		return dbService.findWithAttributesAndLoad(attributes);
-	}
-	
-	public List<BaseDBBean> findDBBeansWithAttributes(String ... attributes) throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.findDBBeansWithAttributes(attributes);
+		return dbService.findWithAttributesAndLoad(this,attributes);
 	}
 	
 	public boolean startTransaction() throws DBServiceNotInitException
@@ -261,15 +245,15 @@ public class BaseDBBean {
 		return this;
 	}
 
-	public void setDataStatus(DBDataStatus dataStatus){
+	public void setDataStatus(String dataStatus){
 		this.dataStatus=dataStatus;
 	}
 
-	public DBDataStatus getDataStatus(){
+	public String getDataStatus(){
 		return this.dataStatus;
 	}
 
-	public BaseDBBean dataStatus(DBDataStatus dataStatus){
+	public BaseDBBean dataStatus(String dataStatus){
 		this.dataStatus=dataStatus;
 		return this;
 	}
