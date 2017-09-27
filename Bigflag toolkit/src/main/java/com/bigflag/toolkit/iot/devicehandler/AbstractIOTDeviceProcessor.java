@@ -38,11 +38,11 @@ public abstract class AbstractIOTDeviceProcessor {
 		this.deviceProcessor = deviceProcessor;
 	}
 	
-	public void processIOTData(byte[] data)
+	public void processIOTData(long sessionID,byte[] data)
 	{
 		if(this.deviceIdentifier.isThisDevice(data))
 		{
-			this.deviceProcessor.processIOTData(data);
+			this.deviceProcessor.processIOTData(sessionID,data);
 		}
 	}
 	

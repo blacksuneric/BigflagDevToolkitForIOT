@@ -6,7 +6,6 @@ package com.bigflag.toolkit.tool.socket.impl.mina;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +16,8 @@ import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionClosed;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionCreated;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /***
@@ -39,10 +40,12 @@ import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
  *         mail: 34223022@qq.com<br>
  *         Create at:2017年9月26日 下午1:28:16
  */
-public class SocketSerivceMinaImpl implements ISocketService {
+public class SocketSerivceMinaImpl implements ISocketService,OnSessionCreated,OnSessionClosed {
 
 	private NioSocketAcceptor acceptor;
 	private Map<Long,ISocketSession> socketSessions=new ConcurrentHashMap<Long, ISocketSession>();
+	private ISocketService.OnSessionCreated outsideOnSessionCreated;
+	private ISocketService.OnSessionClosed outsideOnSessionClosed;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,8 +59,9 @@ public class SocketSerivceMinaImpl implements ISocketService {
 
 		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
 		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaProtocolCodecFactory()));
-
-		acceptor.setHandler(new MinaTCPHandler(onReceiveData,onSessionCreated,onSessionClosed));
+		this.outsideOnSessionClosed=onSessionClosed;
+		this.outsideOnSessionCreated=onSessionCreated;
+		acceptor.setHandler(new MinaTCPHandler(onReceiveData,this,this));
 		acceptor.getSessionConfig().setReadBufferSize(2048);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 1800);
 		acceptor.setCloseOnDeactivation(true);
@@ -166,6 +170,30 @@ public class SocketSerivceMinaImpl implements ISocketService {
 	public boolean removeSocketSession(ISocketSession socketSession) {
 		socketSessions.remove(socketSession.getSessionID());
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionClosed#onSessionClosed(com.bigflag.toolkit.tool.socket.interfaces.ISocketSession)
+	 */
+	@Override
+	public void onSessionClosed(ISocketSession socketSession) {
+		this.removeSocketSession(socketSession);
+		if(outsideOnSessionClosed!=null)
+		{
+			outsideOnSessionClosed.onSessionClosed(socketSession);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionCreated#onSessionCreated(com.bigflag.toolkit.tool.socket.interfaces.ISocketSession)
+	 */
+	@Override
+	public void onSessionCreated(ISocketSession socketSession) {
+		this.addSocketSession(socketSession);
+		if(outsideOnSessionCreated!=null)
+		{
+			outsideOnSessionCreated.onSessionCreated(socketSession);
+		}
 	}
 
 }

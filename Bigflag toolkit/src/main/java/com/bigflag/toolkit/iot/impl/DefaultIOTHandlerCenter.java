@@ -45,11 +45,11 @@ public class DefaultIOTHandlerCenter implements IIOTHandlerCenter {
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter#processIOTData(byte[])
 	 */
-	public void processIOTData(byte[] data) {
+	public void processIOTData(long sessionID,byte[] data) {
 		for(AbstractIOTDeviceProcessor deviceProcessor:deviceProcessors)
 		{
 			handlerExecutor.execute(()->{
-				deviceProcessor.processIOTData(data);
+				deviceProcessor.processIOTData(sessionID,data);
 			});
 		}
 	}

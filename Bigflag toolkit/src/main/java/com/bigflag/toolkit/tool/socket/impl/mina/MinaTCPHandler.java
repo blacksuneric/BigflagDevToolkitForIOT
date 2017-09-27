@@ -45,7 +45,7 @@ public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 		super.messageReceived(session, message);
 		if(onReceiveDataListener!=null)
 		{
-			onReceiveDataListener.onReceiveData(message);
+			onReceiveDataListener.onReceiveData(session.getId(),message);
 		}
 		
 	}
@@ -74,6 +74,7 @@ public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 		{
 			onSessionCreated.onSessionCreated(new MinaSocketSession(session));
 		}
+		
 	}
 
 	@Override

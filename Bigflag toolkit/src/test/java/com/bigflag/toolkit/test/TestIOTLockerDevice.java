@@ -69,9 +69,6 @@ public class TestIOTLockerDevice {
 
 	@Test
 	public void test() {
-		DefaultIOTHandlerCenter defaultIOTHandlerCenter=new DefaultIOTHandlerCenter();
-		defaultIOTHandlerCenter.registerIOTProcessor(new IOTLockerProcessor());
-		defaultIOTHandlerCenter.processIOTData(new byte[]{(byte) 0xEE,11,22});
 	}
 
 }

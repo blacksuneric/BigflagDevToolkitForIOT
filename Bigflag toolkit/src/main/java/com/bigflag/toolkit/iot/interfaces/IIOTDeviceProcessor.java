@@ -23,5 +23,5 @@ package com.bigflag.toolkit.iot.interfaces;
  *         Create at: 2017年9月21日 下午6:22:02 
  */
 public interface IIOTDeviceProcessor {
-	public boolean processIOTData(byte[] data);
+	public boolean processIOTData(long sessionID,byte[] data);
 }

@@ -31,7 +31,7 @@ public class IOTLockerDeviceProcessor implements IIOTDeviceProcessor {
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor#processIOTData(byte[])
 	 */
-	public boolean processIOTData(byte[] data) {
+	public boolean processIOTData(long sessionID,byte[] data) {
 		System.out.println("handled locker:"+Arrays.toString(data));
 		return true;
 	}

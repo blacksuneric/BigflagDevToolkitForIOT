@@ -42,7 +42,7 @@ public interface ISocketService {
 	public boolean removeSocketSession(ISocketSession socketSession);
 	
 	public interface OnReceiveData{
-		public void onReceiveData(Object data);
+		public void onReceiveData(long sessionID,Object data);
 	}
 	
 	public interface OnSessionCreated{

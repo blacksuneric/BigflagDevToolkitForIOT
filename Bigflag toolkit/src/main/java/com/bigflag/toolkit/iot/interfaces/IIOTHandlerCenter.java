@@ -26,5 +26,5 @@ import com.bigflag.toolkit.iot.devicehandler.AbstractIOTDeviceProcessor;
  */
 public interface IIOTHandlerCenter {
 	public boolean registerIOTProcessor(AbstractIOTDeviceProcessor iotDeviceProcessor);
-	public void processIOTData(byte[] data);
+	public void processIOTData(long sessionID,byte[] data);
 }
