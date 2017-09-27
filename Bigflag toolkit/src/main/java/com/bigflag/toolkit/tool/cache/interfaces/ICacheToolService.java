@@ -33,10 +33,11 @@ public interface ICacheToolService {
 	public boolean isInited();
 	public String findValueByKey(String key);
 	public <T> T findObjByKey(String key,Class<T> clazz);
-	public boolean updateOrSaveValueByKey(String key,String value,int expireTime);
-	public boolean updateOrSaveValueByKey(String key,Object value,int expireTime);
-	public boolean removeValue(String key);
+	public String saveValueByKey(String key,String value);
+	public String saveValueByKeyExpireTime(String key,String value,int expireTime);
+	public String removeValue(String key);
 	public <T> List<T> findObjsByKey(String key,Class<T> clazz);
-	public boolean insertValue(String containterName,String key,String value);
-	public boolean insertValue(String containterName,String key,Object value);
+	public boolean insertValue(String listName,String value);
+	public boolean removeListValue(String listName,String value);
+	public List<String> getListValues(String listName); 
 }

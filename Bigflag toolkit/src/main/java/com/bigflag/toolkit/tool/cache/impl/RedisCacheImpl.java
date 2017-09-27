@@ -3,12 +3,14 @@
  */
 package com.bigflag.toolkit.tool.cache.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import com.alibaba.fastjson.JSON;
 import com.bigflag.toolkit.exception.CacheServiceNotInitException;
 import com.bigflag.toolkit.tool.cache.beans.BaseCacheConfigBean;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
@@ -84,7 +86,7 @@ public class RedisCacheImpl implements ICacheToolService {
 		checkIfInit();
 		Jedis jedis = jedisPool.getResource();
 		String result=jedis.get(key);
-		jedisPool.returnResource(jedis);
+		jedis.close();
 		return result;
 	}
 
@@ -96,46 +98,12 @@ public class RedisCacheImpl implements ICacheToolService {
 	 * , java.lang.Class)
 	 */
 	public <T> T findObjByKey(String key, Class<T> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		checkIfInit();
+		String result=this.findValueByKey(key);
+		return JSON.parseObject(result, clazz);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#updateOrSaveValueByKey(java
-	 * .lang.String, java.lang.String, int)
-	 */
-	public boolean updateOrSaveValueByKey(String key, String value, int expireTime) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#updateOrSaveValueByKey(java
-	 * .lang.String, java.lang.Object, int)
-	 */
-	public boolean updateOrSaveValueByKey(String key, Object value, int expireTime) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#removeValue(java.lang.String
-	 * )
-	 */
-	public boolean removeValue(String key) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -144,43 +112,87 @@ public class RedisCacheImpl implements ICacheToolService {
 	 * String, java.lang.Class)
 	 */
 	public <T> List<T> findObjsByKey(String key, Class<T> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> entries=this.getListValues(key);
+		List<T> result=new ArrayList<T>();
+		for(String entry:entries)
+		{
+			result.add(JSON.parseObject(entry, clazz));
+		}
+		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#insertValue(java.lang.String
-	 * , java.lang.String, java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#saveValueByKey(java.lang.String, java.lang.String)
 	 */
-	public boolean insertValue(String containterName, String key, String value) {
-		// TODO Auto-generated method stub
-		return false;
+	@Override
+	public String saveValueByKey(String key, String value) {
+		checkIfInit();
+		Jedis jedis = jedisPool.getResource();
+		String result=jedis.set(key, value);
+		jedis.close();
+		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#insertValue(java.lang.String
-	 * , java.lang.String, java.lang.Object)
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#saveValueByKeyExpireTime(java.lang.String, java.lang.String, int)
 	 */
-	public boolean insertValue(String containterName, String key, Object value) {
-		// TODO Auto-generated method stub
-		return false;
+	@Override
+	public String saveValueByKeyExpireTime(String key, String value, int expireTime) {
+		checkIfInit();
+		Jedis jedis = jedisPool.getResource();
+		String result=jedis.setex(key, expireTime, value);
+		jedis.close();
+		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.cache.ICacheService#findObj(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#removeValue(java.lang.String)
 	 */
-	public <T> List<T> findObj(String key) {
-		// TODO Auto-generated method stub
-		return null;
+	@Override
+	public String removeValue(String key) {
+		checkIfInit();
+		Jedis jedis = jedisPool.getResource();
+		String result=jedis.get(key);
+		jedis.del(key);
+		jedis.close();
+		return result;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#insertValue(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean insertValue(String listName, String value) {
+		Jedis jedis=jedisPool.getResource();
+		long result=jedis.lpush(listName, value);
+		jedis.close();
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#removeListValue(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean removeListValue(String listName, String value) {
+		Jedis jedis=jedisPool.getResource();
+		long result=jedis.lrem(listName, 0, value);
+		jedis.close();
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService#getListValues(java.lang.String)
+	 */
+	@Override
+	public List<String> getListValues(String listName) {
+		Jedis jedis=jedisPool.getResource();
+		List<String> result=jedis.lrange(listName, 0, -1);
+		jedis.close();
+		return result;
+	}
+
+	
+
+	
 
 }
