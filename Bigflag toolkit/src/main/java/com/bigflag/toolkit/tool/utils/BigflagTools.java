@@ -3,6 +3,8 @@
  */
 package com.bigflag.toolkit.tool.utils;
 
+import org.joda.time.DateTime;
+
 /***
  * 
  * Copyright 2017-2027 the original author or authors.
@@ -49,6 +51,29 @@ public class BigflagTools {
 		}
 
 		return bs;
+	}
+	
+	public static String getXorString(String hexStr) {
+		if (hexStr.contains(",")) {
+			hexStr = hexStr.replace(",", "");
+		}
+		int xor = Integer.parseUnsignedInt(hexStr.substring(0, 2), 16);
+		for (int i = 2; i < hexStr.length() - 1; i = i + 2) {
+			String h = hexStr.substring(i, i + 2);
+			int hexDec = Integer.parseUnsignedInt(h, 16);
+			xor = xor ^ hexDec;
+		}
+		String xorr = Integer.toString(xor, 16).toUpperCase();
+		if (xorr.length() == 1) {
+			xorr = "0" + xorr;
+		}
+		return xorr;
+
+	}
+	
+	public static String getCurrentTimeLongStr()
+	{
+		return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
 	}
 	
 	public static byte uniteBytes(String src0, String src1) {
