@@ -1,4 +1,4 @@
-package com.bigflag.toolkit.tool.socket.beans;
+package com.bigflag.toolkit.tool.socket.beans.json;
 import java.util.Arrays;
 import com.alibaba.fastjson.JSON;
 
