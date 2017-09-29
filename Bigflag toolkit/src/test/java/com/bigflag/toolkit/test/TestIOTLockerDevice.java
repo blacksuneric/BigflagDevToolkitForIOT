@@ -3,20 +3,11 @@
  */
 package com.bigflag.toolkit.test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.bigflag.toolkit.iot.devicehandler.IOTLockerProcessor;
-import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
-import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
-import com.bigflag.toolkit.tool.http.services.HttpToolHelperFactory;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -69,6 +60,7 @@ public class TestIOTLockerDevice {
 
 	@Test
 	public void test() {
+
 	}
 
 }
