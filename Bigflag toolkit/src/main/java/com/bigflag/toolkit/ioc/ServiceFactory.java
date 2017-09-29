@@ -13,7 +13,9 @@ import com.bigflag.toolkit.tool.http.interfaces.IHttpToolService;
 import com.bigflag.toolkit.tool.mq.impl.RabbitMQService;
 import com.bigflag.toolkit.tool.mq.interfaces.IMQToolService;
 import com.bigflag.toolkit.tool.socket.impl.mina.SocketTCPSerivceMinaImpl;
+import com.bigflag.toolkit.tool.socket.impl.mina.SocketUDPSerivceMinaImpl;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -43,6 +45,8 @@ public class ServiceFactory {
 	private final static IHttpToolService defaultHttpPostToolImpl=new DefaultHttpPostToolImpl();
 	private final static ICacheToolService defaultCacheImpl=new RedisCacheImpl();
 	private final static ISocketTCPService defaultSocketTCPService=new SocketTCPSerivceMinaImpl();
+	private final static ISocketUDPService defaultSocketUDPService=new SocketUDPSerivceMinaImpl();
+	
 	private final static IMQToolService defaultMQService=new RabbitMQService();
 	
 	private ServiceFactory() {}
@@ -90,6 +94,11 @@ public class ServiceFactory {
 	public ISocketTCPService getDefaultSocketTCPService()
 	{
 		return defaultSocketTCPService;
+	}
+	
+	public ISocketUDPService getDefaultSocketUDPService()
+	{
+		return defaultSocketUDPService;
 	}
 	
 	public IMQToolService getDefaultMQService()

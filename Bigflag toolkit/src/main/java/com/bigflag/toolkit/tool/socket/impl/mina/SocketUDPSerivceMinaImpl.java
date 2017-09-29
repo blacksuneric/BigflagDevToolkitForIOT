@@ -3,7 +3,15 @@
  */
 package com.bigflag.toolkit.tool.socket.impl.mina;
 
-import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.logging.LoggingFilter;
+import org.apache.mina.transport.socket.DatagramSessionConfig;
+import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
 
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService;
 
@@ -29,23 +37,39 @@ import com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService;
  */
 public class SocketUDPSerivceMinaImpl implements ISocketUDPService {
 
-	private NioSocketAcceptor acceptor;
+	private NioDatagramAcceptor acceptor;
 	
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService#startToListenUDP(int, com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService.OnReceiveData, com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService.OnSessionCreated, com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService.OnSessionClosed)
 	 */
 	@Override
 	public boolean startToListenUDP(int port, OnReceiveData onReceiveData, OnSessionCreated onSessionCreated, OnSessionClosed onSessionClosed) {
-		// TODO Auto-generated method stub
-		return false;
+		acceptor = new NioDatagramAcceptor();
+
+		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
+		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaProtocolCodecFactory()));
+		acceptor.setHandler(new MinaUDPHandler(onReceiveData, onSessionCreated, onSessionClosed));
+		DatagramSessionConfig dcfg = (DatagramSessionConfig) acceptor.getSessionConfig();
+		dcfg.setReuseAddress(true);
+		dcfg.setReadBufferSize(2048);
+		dcfg.setIdleTime(IdleStatus.BOTH_IDLE, 1800);
+		acceptor.setCloseOnDeactivation(true);
+		try {
+			acceptor.bind(new InetSocketAddress(port));
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.tool.socket.interfaces.ISocketUDPService#stopListenUDP()
 	 */
 	@Override
 	public boolean stopListenUDP() {
-		// TODO Auto-generated method stub
-		return false;
+		acceptor.unbind();
+		return true;
 	}
 	
 
