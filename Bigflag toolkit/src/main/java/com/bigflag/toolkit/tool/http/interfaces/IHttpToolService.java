@@ -39,12 +39,18 @@ public interface IHttpToolService {
 	 * @param bytes the bytes to post
 	 * @param postByteFeature {@link PostByteFeature} the feature for posting bytes
 	 */
-	public byte[] postBytes(String url,byte[] bytes);
 	
-	public byte[] postCompressedBytes(String url,byte[] bytes,IHttpCompressor compressor,IHttpDecompressor httpDecompressor);
+	public IHttpToolDecorator startToPostBytes(byte[] bytes);
 	
-	public byte[] postEncryptedBytes(String url,byte[] bytes,IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter);
+	public byte[] doPostBytes(String url, byte[] bytes);
 	
-	public byte[] postCompressedEncryptedBytes(String url,byte[] bytes,IHttpCompressor compressor,IHttpDecompressor httpDecompressor,IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter);
+	public interface IHttpToolDecorator
+	{
+		public byte[] doPostBytes(String url);
+		
+		public IHttpToolDecorator compressBytes(IHttpCompressor compressor,IHttpDecompressor httpDecompressor);
+		
+		public IHttpToolDecorator encryptBytes(IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter);
+	}
 	
 }

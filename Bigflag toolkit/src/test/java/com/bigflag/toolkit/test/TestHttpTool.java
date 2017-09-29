@@ -74,8 +74,9 @@ public class TestHttpTool {
 		// params.put("key3", "value3");
 		// String result=impl.postParameter("http://127.0.0.1:8089", params);
 
-		byte[] result = impl.postCompressedBytes("http://127.0.0.1:8089", new byte[] { 48, 49, 50 }, HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR,
-				HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
+//		byte[] result = impl.postCompressedBytes("http://127.0.0.1:8089", new byte[] { 48, 49, 50 }, HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR,
+//				HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
+		byte[] result=impl.startToPostBytes(new byte[]{11,22,33}).compressBytes(null, null).encryptBytes(null, null).doPostBytes("http");
 		System.out.println(Arrays.toString(result));
 		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR);
 		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);

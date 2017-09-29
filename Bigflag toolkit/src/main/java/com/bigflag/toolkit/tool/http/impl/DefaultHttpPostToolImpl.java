@@ -5,13 +5,10 @@ package com.bigflag.toolkit.tool.http.impl;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -21,14 +18,11 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
-import com.bigflag.toolkit.tool.http.enums.PostByteFeature;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpCompressor;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpDecompressor;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpDecrypter;
@@ -57,6 +51,12 @@ import com.bigflag.toolkit.tool.http.interfaces.IHttpToolService;
  */
 public class DefaultHttpPostToolImpl implements IHttpToolService {
 
+	private ThreadLocal<byte[]> postBytes = new ThreadLocal<byte[]>();
+	private ThreadLocal<IHttpCompressor> compressorLocal = new ThreadLocal<IHttpCompressor>();
+	private ThreadLocal<IHttpDecompressor> decompressorLocal = new ThreadLocal<IHttpDecompressor>();
+	private ThreadLocal<IHttpEncrypter> encrypterLocal = new ThreadLocal<IHttpEncrypter>();
+	private ThreadLocal<IHttpDecrypter> decrypterLocal = new ThreadLocal<IHttpDecrypter>();
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,8 +67,7 @@ public class DefaultHttpPostToolImpl implements IHttpToolService {
 	public String postParameter(String url, Map<String, String> params) {
 		String result = "";
 		HttpPost httpRequst = new HttpPost(url);
-		httpRequst.setConfig(RequestConfig.custom().setConnectTimeout(1000 * 10).setConnectionRequestTimeout(1000 * 10).setSocketTimeout(1000 * 10)
-				.build());
+		httpRequst.setConfig(RequestConfig.custom().setConnectTimeout(1000 * 10).setConnectionRequestTimeout(1000 * 10).setSocketTimeout(1000 * 10).build());
 		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>();
 		for (String key : params.keySet()) {
 			nameValuePair.add(new BasicNameValuePair(key, params.get(key)));
@@ -94,72 +93,10 @@ public class DefaultHttpPostToolImpl implements IHttpToolService {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpToolService#postCompressedBytes
-	 * (java.lang.String, byte[],
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpCompressor)
-	 */
-	public byte[] postCompressedBytes(String url, byte[] bytes, IHttpCompressor compressor, IHttpDecompressor httpDecompressor) {
-		byte[] data = compressor.compress(bytes);
-		byte[] result = doPostBytes(url, data);
-		result = httpDecompressor.decompress(result);
-		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpToolService#postEncryptedBytes
-	 * (java.lang.String, byte[],
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpEncrypter,
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpDecrypter)
-	 */
-	public byte[] postEncryptedBytes(String url, byte[] bytes, IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter) {
-		byte[] data = httpEncrypter.encrypt(bytes);
-		byte[] result = doPostBytes(url, data);
-		result = httpDecrypter.decrypt(result);
-		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.bigflag.toolkit.tool.http.interfaces.IHttpToolService#
-	 * postCompressedEncryptedBytes(java.lang.String, byte[],
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpCompressor,
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpEncrypter,
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpDecrypter)
-	 */
-	public byte[] postCompressedEncryptedBytes(String url, byte[] bytes, IHttpCompressor compressor, IHttpDecompressor httpDecompressor,
-			IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter) {
-		byte[] data = httpEncrypter.encrypt(bytes);
-		data = compressor.compress(data);
-		byte[] result = doPostBytes(url, data);
-		result = httpDecrypter.decrypt(result);
-		result = httpDecompressor.decompress(result);
-		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bigflag.toolkit.tool.http.interfaces.IHttpToolService#postBytes(java
-	 * .lang.String, byte[])
-	 */
-	public byte[] postBytes(String url, byte[] bytes) {
-		return doPostBytes(url, bytes);
-	}
-
-	private byte[] doPostBytes(String url, byte[] bytes) {
+	public byte[] doPostBytes(String url, byte[] bytes) {
 		byte[] result = new byte[0];
 		HttpPost httpRequst = new HttpPost(url);
-		httpRequst.setConfig(RequestConfig.custom().setConnectTimeout(1000 * 10).setConnectionRequestTimeout(1000 * 10).setSocketTimeout(1000 * 10)
-				.build());
+		httpRequst.setConfig(RequestConfig.custom().setConnectTimeout(1000 * 10).setConnectionRequestTimeout(1000 * 10).setSocketTimeout(1000 * 10).build());
 		try {
 			httpRequst.setEntity(EntityBuilder.create().setBinary(bytes).build());
 			HttpClient httpClient = HttpClients.createDefault();
@@ -180,5 +117,80 @@ public class DefaultHttpPostToolImpl implements IHttpToolService {
 		}
 		return result;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.bigflag.toolkit.tool.http.interfaces.IHttpToolService#startToPostBytes
+	 * (byte[])
+	 */
+	@Override
+	public HttpToolDecorator startToPostBytes(byte[] bytes) {
+		postBytes.set(bytes);
+		return new HttpToolDecorator(this);
+	}
+	
+	public class HttpToolDecorator implements IHttpToolDecorator
+	{
+		private IHttpToolService httpToolService;
+		
+		public HttpToolDecorator(IHttpToolService httpToolService) {
+			this.httpToolService=httpToolService;
+		}
+
+		/* (non-Javadoc)
+		 * @see com.bigflag.toolkit.tool.http.interfaces.IHttpToolService.IHttpToolDecorator#doPostBytes(java.lang.String)
+		 */
+		@Override
+		public byte[] doPostBytes(String url) {
+			if (postBytes.get() != null) {
+				byte[] data = postBytes.get();
+				if (encrypterLocal.get() != null) {
+					data = encrypterLocal.get().encrypt(postBytes.get());
+				}
+				if (compressorLocal.get() != null) {
+					data = compressorLocal.get().compress(data);
+				}
+				byte[] result = this.httpToolService.doPostBytes(url, data);
+				if (decrypterLocal.get() != null) {
+					result = decrypterLocal.get().decrypt(result);
+				}
+				if (decompressorLocal.get() != null) {
+					result = decompressorLocal.get().decompress(result);
+				}
+				postBytes.remove();
+				encrypterLocal.remove();
+				decrypterLocal.remove();
+				compressorLocal.remove();
+				decompressorLocal.remove();
+				return this.httpToolService.doPostBytes(url, postBytes.get());
+			} else {
+				return new byte[] {};
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see com.bigflag.toolkit.tool.http.interfaces.IHttpToolService.IHttpToolDecorator#compressBytes(com.bigflag.toolkit.tool.http.interfaces.IHttpCompressor, com.bigflag.toolkit.tool.http.interfaces.IHttpDecompressor)
+		 */
+		@Override
+		public IHttpToolDecorator compressBytes(IHttpCompressor compressor, IHttpDecompressor httpDecompressor) {
+			compressorLocal.set(compressor);
+			decompressorLocal.set(httpDecompressor);
+			return this;
+		}
+
+		/* (non-Javadoc)
+		 * @see com.bigflag.toolkit.tool.http.interfaces.IHttpToolService.IHttpToolDecorator#encryptBytes(com.bigflag.toolkit.tool.http.interfaces.IHttpEncrypter, com.bigflag.toolkit.tool.http.interfaces.IHttpDecrypter)
+		 */
+		@Override
+		public IHttpToolDecorator encryptBytes(IHttpEncrypter httpEncrypter, IHttpDecrypter httpDecrypter) {
+			encrypterLocal.set(httpEncrypter);
+			decrypterLocal.set(httpDecrypter);
+			return this;
+		}
+		
+	}
+
 
 }
