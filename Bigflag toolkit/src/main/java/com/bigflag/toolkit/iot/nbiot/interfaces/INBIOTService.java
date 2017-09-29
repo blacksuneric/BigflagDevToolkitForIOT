@@ -25,5 +25,5 @@ package com.bigflag.toolkit.iot.nbiot.interfaces;
  */
 public interface INBIOTService {
 	public boolean cacheNBIOTData(String key,byte[] data);
-	public byte[] getNBIOTCacheData(String key,byte[] data);
+	public byte[] getNBIOTCacheData(String key);
 }

@@ -42,7 +42,7 @@ public class NBIOTService implements INBIOTService {
 	 * @see com.bigflag.toolkit.iot.nbiot.interfaces.INBIOTService#getNBIOTCacheData(java.lang.String, byte[])
 	 */
 	@Override
-	public byte[] getNBIOTCacheData(String key, byte[] data) {
+	public byte[] getNBIOTCacheData(String key) {
 		return nbiotSendDataCache.remove(key);
 	}
 
