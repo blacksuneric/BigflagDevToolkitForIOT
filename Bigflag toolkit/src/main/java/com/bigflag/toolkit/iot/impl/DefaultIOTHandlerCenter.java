@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 
 import com.bigflag.toolkit.iot.devicehandler.AbstractIOTDeviceProcessor;
 import com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -52,6 +53,20 @@ public class DefaultIOTHandlerCenter implements IIOTHandlerCenter {
 				deviceProcessor.processIOTData(sessionID,data);
 			});
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter#processIOTUDPData(com.bigflag.toolkit.tool.socket.interfaces.ISocketSession, byte[])
+	 */
+	@Override
+	public void processIOTUDPData(ISocketSession socketSession, byte[] data) {
+		for(AbstractIOTDeviceProcessor deviceProcessor:deviceProcessors)
+		{
+			handlerExecutor.execute(()->{
+				deviceProcessor.processIOTUDPData(socketSession, data);
+			});
+		}
+		
 	}
 
 }

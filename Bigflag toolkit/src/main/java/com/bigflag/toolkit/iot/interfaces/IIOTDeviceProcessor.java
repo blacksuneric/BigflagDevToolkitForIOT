@@ -3,6 +3,8 @@
  */
 package com.bigflag.toolkit.iot.interfaces;
 
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
+
 /**
  * Copyright 2017-2027 the original author or authors.
  *
@@ -24,4 +26,5 @@ package com.bigflag.toolkit.iot.interfaces;
  */
 public interface IIOTDeviceProcessor {
 	public boolean processIOTData(long sessionID,byte[] data);
+	public boolean processIOTUDPData(ISocketSession socketSession,byte[] data);
 }

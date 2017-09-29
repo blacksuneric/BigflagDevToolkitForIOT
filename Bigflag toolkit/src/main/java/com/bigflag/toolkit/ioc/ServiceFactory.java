@@ -6,6 +6,8 @@ import com.bigflag.toolkit.db.impl.C3P0DBService;
 import com.bigflag.toolkit.db.interfaces.IDBService;
 import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
 import com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter;
+import com.bigflag.toolkit.iot.nbiot.impl.NBIOTService;
+import com.bigflag.toolkit.iot.nbiot.interfaces.INBIOTService;
 import com.bigflag.toolkit.tool.cache.impl.RedisCacheImpl;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
@@ -46,8 +48,8 @@ public class ServiceFactory {
 	private final static ICacheToolService defaultCacheImpl=new RedisCacheImpl();
 	private final static ISocketTCPService defaultSocketTCPService=new SocketTCPSerivceMinaImpl();
 	private final static ISocketUDPService defaultSocketUDPService=new SocketUDPSerivceMinaImpl();
-	
 	private final static IMQToolService defaultMQService=new RabbitMQService();
+	private final static INBIOTService defaultNBIOTService=new NBIOTService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -106,4 +108,8 @@ public class ServiceFactory {
 		return defaultMQService;
 	}
 
+	public INBIOTService getDefaultNBIOTService()
+	{
+		return defaultNBIOTService;
+	}
 }

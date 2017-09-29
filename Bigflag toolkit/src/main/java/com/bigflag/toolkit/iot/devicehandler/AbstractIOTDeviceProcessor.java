@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import com.bigflag.toolkit.iot.interfaces.IIOTDeviceIdentifier;
 import com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -53,5 +54,15 @@ public abstract class AbstractIOTDeviceProcessor {
 		
 	}
 	
+	public void processIOTUDPData(ISocketSession socketSession,byte[] data)
+	{
+		executor.execute(()->{
+			if(this.deviceIdentifier.isThisDevice(data))
+			{
+				this.deviceProcessor.processIOTUDPData(socketSession,data);
+			}
+		});
+		
+	}
 	
 }

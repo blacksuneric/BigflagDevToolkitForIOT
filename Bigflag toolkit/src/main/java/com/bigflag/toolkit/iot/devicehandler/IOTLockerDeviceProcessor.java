@@ -6,6 +6,7 @@ package com.bigflag.toolkit.iot.devicehandler;
 import java.util.Arrays;
 
 import com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -34,6 +35,15 @@ public class IOTLockerDeviceProcessor implements IIOTDeviceProcessor {
 	public boolean processIOTData(long sessionID,byte[] data) {
 		System.out.println("handled locker:"+Arrays.toString(data));
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.bigflag.toolkit.iot.interfaces.IIOTDeviceProcessor#processIOTUDPData(com.bigflag.toolkit.tool.socket.interfaces.ISocketSession, byte[])
+	 */
+	@Override
+	public boolean processIOTUDPData(ISocketSession socketSession, byte[] data) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

@@ -4,6 +4,7 @@
 package com.bigflag.toolkit.iot.interfaces;
 
 import com.bigflag.toolkit.iot.devicehandler.AbstractIOTDeviceProcessor;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -27,4 +28,5 @@ import com.bigflag.toolkit.iot.devicehandler.AbstractIOTDeviceProcessor;
 public interface IIOTHandlerCenter {
 	public boolean registerIOTProcessor(AbstractIOTDeviceProcessor iotDeviceProcessor);
 	public void processIOTData(long sessionID,byte[] data);
+	public void processIOTUDPData(ISocketSession socketSession,byte[] data);
 }
