@@ -5,16 +5,16 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnReceiveData;
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionClosed;
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionCreated;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService.OnReceiveData;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService.OnSessionClosed;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService.OnSessionCreated;
 
 public class MinaTCPHandler extends IoHandlerAdapter implements IoHandler {
 	
-	private ISocketService.OnReceiveData onReceiveDataListener;
-	private ISocketService.OnSessionCreated onSessionCreated;
-	private ISocketService.OnSessionClosed onSessionClosed;
+	private ISocketTCPService.OnReceiveData onReceiveDataListener;
+	private ISocketTCPService.OnSessionCreated onSessionCreated;
+	private ISocketTCPService.OnSessionClosed onSessionClosed;
 	
 	/**
 	 * @param onReceiveDataListener

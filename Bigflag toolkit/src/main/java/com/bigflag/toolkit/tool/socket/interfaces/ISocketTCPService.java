@@ -26,12 +26,12 @@ import java.util.List;
  *		   mail:     34223022@qq.com<br>
  *         Create at:2017年9月26日 下午1:13:43
  */
-public interface ISocketService {
+public interface ISocketTCPService {
 	public boolean startToListenTCP(
 			int port
-			,ISocketService.OnReceiveData onReceiveData
-			,ISocketService.OnSessionCreated onSessionCreated
-			,ISocketService.OnSessionClosed onSessionClosed);
+			,ISocketTCPService.OnReceiveData onReceiveData
+			,ISocketTCPService.OnSessionCreated onSessionCreated
+			,ISocketTCPService.OnSessionClosed onSessionClosed);
 	public boolean stopListenTCP();
 	public ISocketSession findSocketSession(long sessionID);
 	public ISocketSession findSocketSession(String sessionKey);

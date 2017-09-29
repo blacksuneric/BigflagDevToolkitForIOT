@@ -15,9 +15,9 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService;
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionClosed;
-import com.bigflag.toolkit.tool.socket.interfaces.ISocketService.OnSessionCreated;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService.OnSessionClosed;
+import com.bigflag.toolkit.tool.socket.interfaces.ISocketTCPService.OnSessionCreated;
 import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
 
 /***
@@ -40,12 +40,12 @@ import com.bigflag.toolkit.tool.socket.interfaces.ISocketSession;
  *         mail: 34223022@qq.com<br>
  *         Create at:2017年9月26日 下午1:28:16
  */
-public class SocketSerivceMinaImpl implements ISocketService,OnSessionCreated,OnSessionClosed {
+public class SocketTCPSerivceMinaImpl implements ISocketTCPService,OnSessionCreated,OnSessionClosed {
 
 	private NioSocketAcceptor acceptor;
 	private Map<Long,ISocketSession> socketSessions=new ConcurrentHashMap<Long, ISocketSession>();
-	private ISocketService.OnSessionCreated outsideOnSessionCreated;
-	private ISocketService.OnSessionClosed outsideOnSessionClosed;
+	private ISocketTCPService.OnSessionCreated outsideOnSessionCreated;
+	private ISocketTCPService.OnSessionClosed outsideOnSessionClosed;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -54,7 +54,7 @@ public class SocketSerivceMinaImpl implements ISocketService,OnSessionCreated,On
 	 * (int)
 	 */
 	@Override
-	public boolean startToListenTCP(int port, ISocketService.OnReceiveData onReceiveData, ISocketService.OnSessionCreated onSessionCreated, ISocketService.OnSessionClosed onSessionClosed) {
+	public boolean startToListenTCP(int port, ISocketTCPService.OnReceiveData onReceiveData, ISocketTCPService.OnSessionCreated onSessionCreated, ISocketTCPService.OnSessionClosed onSessionClosed) {
 		acceptor = new NioSocketAcceptor();
 
 		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
