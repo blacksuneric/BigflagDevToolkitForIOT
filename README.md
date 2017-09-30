@@ -9,7 +9,7 @@ Besides the IOT connection architecture, the framework also provided Cache, Coor
 
 The framework is still in implementation phase but current version should work as a base framework for setting up an IOT domain server.
 
-IOT
+IOT Service
 ---
 #### TCP Service for GPRS-like device
 To start TCP service for GPRS-like device to process data, you can follow below steps with demo code. 
@@ -36,7 +36,7 @@ iotHandlerCenter.registerIOTProcessor(new AbstractIOTDeviceProcessor());
 ```
 For AbstractIOTDeviceProcessor class, it contains IIOTDeviceIdentifier and IIOTDeviceProcessor. The IIOTDeviceIdentifier will check if data from device tells it is the right device the processor wants, if it is, the IIOTDeviceIdentifier will pass the data to IIOTDeviceProcessor for further process, is not then drop the data. for example.
 ``` java
-// the Locker device identifier, it the data begins with 0xEE, then it is the Locker device
+// the Locker device identifier, if the data begins with 0xEE, then it is the Locker device
 public class IOTLockerDeviceIdentifier implements IIOTDeviceIdentifier {
 
 	public boolean isThisDevice(byte[] data) {
@@ -90,3 +90,15 @@ socketUdpService.startToListenUDP(listenPort, (sessionID,data)->{
 		});
 ```
 Just changed two parts for UPD connection and for IIOTDeviceProcessor, it will invoke processIOTUDPData(ISocketSession socketSession, byte[] data) 
+
+Cache Service
+---
+To use cache service, only to init it with connection informations, afte that, you can use the data save and retrieve method from ICacheToolService.
+Current default cache service is for redis, so if you want to use the default one, you will need a redis server to connect.
+```java
+ICacheToolService cacheService=ServiceFactory.getInstance().getDefaultCacheToolService();
+cacheService.initCacheService(BaseCacheConfigBean configBean);
+cacheService.saveValueByKey(String key,String value);
+cacheService.findValueByKey(String key);
+```
+
