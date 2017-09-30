@@ -12,14 +12,16 @@ The framework is still in implementation phase but current version should work a
 IOT
 ---
 #### TCP Service for GPRS-like device
-To start TCP service for GPRS-like device to process data, you can follow below steps with demo code.
+To start TCP service for GPRS-like device to process data, you can follow below steps with demo code. `I will use Interface to present the  actual implementation, when you star to code, please use actual implementation service class, otherwise it will fail`
 ##### 1. start tcp service listen
 ``` java
-public boolean startToListenTCP(
-			int port
-			,ISocketTCPService.OnReceiveData onReceiveData
-			,ISocketTCPService.OnSessionCreated onSessionCreated
-			,ISocketTCPService.OnSessionClosed onSessionClosed);
+ISocketTCPService.startToListenTCP(listenPort, (sessionID,data)->{
+			IIOTHandlerCenter.processIOTData(sessionID,(byte[])data);
+		}, (socketSession)->{
+			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+getSocketTCPService().getAllSocketSessions().size());
+		}, (socketSession)->{
+			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+getSocketTCPService().getAllSocketSessions().size());
+		});
 ```
 
 ![](https://github.com/blacksuneric/BigflagDevToolkit/blob/master/Bigflag%20toolkit/src/main/resources/IOT_TCP_Service_Process_Data.png)
