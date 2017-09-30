@@ -34,3 +34,39 @@ Alternatively, you can do step 2 before step 1. The default IIOTHandlerCenter is
 ```java
 iotHandlerCenter.registerIOTProcessor(new AbstractIOTDeviceProcessor());
 ```
+For AbstractIOTDeviceProcessor class, it contains IIOTDeviceIdentifier and IIOTDeviceProcessor. The IIOTDeviceIdentifier will check if data from device tells it is the right device the processor wants, if it is, the IIOTDeviceIdentifier will pass the data to IIOTDeviceProcessor for further process, is not then drop the data. for example.
+``` java
+// the Locker device identifier, it the data begins with 0xEE, then it is the Locker device
+public class IOTLockerDeviceIdentifier implements IIOTDeviceIdentifier {
+
+	public boolean isThisDevice(byte[] data) {
+		return data.length>2&&data[0]==(byte) 0xEE;
+	}
+}
+
+// the Lockert device processor, if the IIOTDeviceIdentifier recogize the device, then will continue process the data
+public class IOTLockerDeviceProcessor implements IIOTDeviceProcessor {
+
+    // process data for TCP connection
+	public boolean processIOTData(long sessionID,byte[] data) {
+		System.out.println("handled locker:"+Arrays.toString(data));
+		return true;
+	}
+    // process data for UPD connection
+	@Override
+	public boolean processIOTUDPData(ISocketSession socketSession, byte[] data) {
+        // for UDP connection, the best time to send data is the time when you receivce data from it
+        // especially for NBIOT device in China
+        socketSession.sendData(new byte[]{11,22});
+		return false;
+	}
+}
+
+public class IOTLockerProcessor extends AbstractIOTDeviceProcessor {
+    
+	public IOTLockerProcessor() {
+        // to construct device processor with above two components
+		super(new IOTLockerDeviceIdentifier(),new IOTLockerDeviceProcessor());
+	}
+}
+```
