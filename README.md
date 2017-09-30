@@ -8,3 +8,7 @@ First thing first, this framework is designed mainly for IOT domain. It can help
 Besides the IOT connection architecture, the framework also provided Cache, Coordination, DB, RPC and Message Queue architectures. These are default implementation for these services, cache service is with Redis; coordination service is with Zookeeper; RPC is with apache HttpClient for restful type RPC, it use protobuf as the protocol to transmit bytes; message queue is with RabbitMQ; BD is ORM based and with c3p0 connection pool and the framework support SQL routine, so you can use it to easily adopt the divided-database-divided-table methodology. Developers can easily adopt their own implementation by implement the service interfaces since there is an IOC to choose the corresponding implementation with outside configuration.
 
 The framework is still in implementation phase but current version should work as a base framework for setting up an IOT domain server.
+
+IOT
+---
+![](https://github.com/blacksuneric/BigflagDevToolkit/blob/master/Bigflag%20toolkit/src/main/resources/IOT_TCP_Service_Process_Data.png)
