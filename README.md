@@ -11,4 +11,7 @@ The framework is still in implementation phase but current version should work a
 
 IOT
 ---
+#TCP Service for GPRS-like device
+
+
 ![](https://github.com/blacksuneric/BigflagDevToolkit/blob/master/Bigflag%20toolkit/src/main/resources/IOT_TCP_Service_Process_Data.png)
