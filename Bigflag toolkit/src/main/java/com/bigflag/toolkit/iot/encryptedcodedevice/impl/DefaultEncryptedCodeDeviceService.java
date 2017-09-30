@@ -5,6 +5,10 @@ package com.bigflag.toolkit.iot.encryptedcodedevice.impl;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.joda.time.DateTime;
+
 import com.bigflag.toolkit.iot.encryptedcodedevice.interfaces.IEncryptedCodeDeviceService;
 
 /**
@@ -33,8 +37,15 @@ public class DefaultEncryptedCodeDeviceService implements IEncryptedCodeDeviceSe
 	 */
 	@Override
 	public String getEncryptedCodeForDevice(Date time, String deviceCode) {
-		
-		return deviceCode;
+		int deviceNumber=NumberUtils.toInt(deviceCode, 0);
+		int key=RandomUtils.nextInt(10, 99);
+		if(deviceNumber<0||deviceNumber>10000000)
+		{
+			throw new IllegalArgumentException("the default encrypted code device's deviceCode should be number 1 ~ 9999999");
+		}
+		String timeStr=DateTime.now().toString("MMddHHmm");
+		int code=(NumberUtils.toInt(timeStr)+deviceNumber)^key;
+		return key+String.valueOf(code);
 	}
 
 }
