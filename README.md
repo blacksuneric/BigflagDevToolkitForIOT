@@ -125,15 +125,32 @@ mqService.sendMsg(String subject,String routingKey,byte[] msg, MQSendType mqSend
 ```
 RPC Service
 ---
+The RPC adopt restful methodology. It transmits bytes with protobuf protocol through Apache HttpClient. I did not use Thrift or RMI as the base framework is because that I want it to be used as widely as possible. If you are a fan of thrift or RMI, you can still have your solution by implement the RPC interfaces.
 
+The HttpToolService can compress and encrypt the byte data using builder.
+``` java
+IHttpToolService httpToolService=ServiceFactory.getInstance().getDefaultHttpPostToolImpl();
+httpToolService.startToPostBytes(new byte[]{11,22,33}).compressBytes(IHttpCompressor,IHttpDecompressor).encryptBytes(IHttpEncrypter, IHttpDecrypter).doPostBytes("http://test.com");
+```
 Cooridation Service
 ---
-
+WIP
 DB Service
 ---
+WIP
 
 IOC Service
 ---
+WIP
 
 Utils For IOT
 ---
+There are functions for IOT domain
+``` java
+// this function will return 11,22,33 it convert the bytes to a readable String
+BigflagTools.byteToHexString(new Byte[]{0x11,0x22,0x33});
+// this function will return byte[]{0x11,0x22,0x33} it convert the readable String to bytes
+BigflagTools.hexStringToBytes("11,22,33");
+// this function will return the xor result of the input hexStr in above format
+BigflagTools.getXorString(String hexStr) {
+```
