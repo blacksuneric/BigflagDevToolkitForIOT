@@ -12,16 +12,25 @@ The framework is still in implementation phase but current version should work a
 IOT
 ---
 #### TCP Service for GPRS-like device
-To start TCP service for GPRS-like device to process data, you can follow below steps with demo code. `I will use Interface to present the  actual implementation, when you star to code, please use actual implementation service class, otherwise it will fail`
+To start TCP service for GPRS-like device to process data, you can follow below steps with demo code. 
 ##### 1. start tcp service listen
+
 ``` java
-ISocketTCPService.startToListenTCP(listenPort, (sessionID,data)->{
-			IIOTHandlerCenter.processIOTData(sessionID,(byte[])data);
+ISocketTCPService socketTcpService=ServiceFactory.getInstance().getDefaultSocketTCPService();
+IIOTHandlerCenter iotHandlerCenter=ServiceFactory.getInstance().getDefaultIOTHandlerCenter();
+socketTcpService.startToListenTCP(listenPort, (sessionID,data)->{
+            // this is where you process the tcp incoming data
+    		iotHandlerCenter.processIOTData(sessionID,(byte[])data);
 		}, (socketSession)->{
-			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+getSocketTCPService().getAllSocketSessions().size());
+            // this is where tcp session created
+			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+socketTcpService.getAllSocketSessions().size());
 		}, (socketSession)->{
-			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+getSocketTCPService().getAllSocketSessions().size());
+            // this is where tcp session closed
+			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+socketTcpService.getAllSocketSessions().size());
 		});
 ```
-
-![](https://github.com/blacksuneric/BigflagDevToolkit/blob/master/Bigflag%20toolkit/src/main/resources/IOT_TCP_Service_Process_Data.png)
+##### 2. register IOT device handlers
+Alternatively, you can do step 2 before step 1. The default IIOTHandlerCenter is thread safe.
+```java
+iotHandlerCenter.registerIOTProcessor(new AbstractIOTDeviceProcessor());
+```
