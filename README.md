@@ -5,7 +5,8 @@ Overview
 
 First thing first, this framework is designed mainly for IOT domain. It can help developer to build up an IOT server in just a few steps. It can support TCP connection as the GPRS-like IOT device use and also support UDP connection as the NBIOT device use. Although the NBIOT device can also provide TCP connection to connect server, form my work experience, considering the NBIOT application scenarios, it usually require the NBIOT device work in a low power consumption, data delay tolerate situation so in most cases, NBIOT will adopt UDP as its connection protocol. So this framework also provides the base architecture to support UDP.
 
-Besides the IOT connection architecture, the framework also provided Cache, Coordination, DB, RPC and Message Queue architectures. These are default implementation for these services, cache service is with Redis; coordination service is with Zookeeper; RPC is with apache HttpClient for restful type RPC, it use protobuf as the protocol to transmit bytes; message queue is with RabbitMQ; BD is ORM based and with c3p0 connection pool and the framework support SQL routine, so you can use it to easily adopt the divided-database-divided-table methodology. Developers can easily adopt their own implementation by implement the service interfaces since there is an IOC to choose the corresponding implementation with outside configuration.
+Besides the IOT connection architecture, the framework also provided Cache, Coordination, DB, RPC and Message Queue architectures. These are default implementation for these services, cache service is with Redis; coordination service is with Zookeeper; RPC is with apache HttpClient for restful type RPC, it use protobuf as the protocol to transmit bytes;
+message queue is with RabbitMQ; DB is ORM based and with c3p0 connection pool and the framework support SQL routine, so you can use it to easily adopt the divided-database-divided-table methodology. Developers can easily adopt their own implementation by implement the service interfaces since there is an IOC to choose the corresponding implementation with outside configuration.
 
 The framework is still in implementation phase but current version should work as a base framework for setting up an IOT domain server.
 
@@ -91,6 +92,11 @@ socketUdpService.startToListenUDP(listenPort, (sessionID,data)->{
 ```
 Just changed two parts for UPD connection and for IIOTDeviceProcessor, it will invoke processIOTUDPData(ISocketSession socketSession, byte[] data) 
 
+To send data to a NBIOT device throug UDP, you need to cache the data first then let NBIOT device adopt PULL from server method to send
+``` java
+ServiceFactory.getInstance().getDefaultNBIOTService().cacheNBIOTData("00,00", new byte[]{11,22,33,44});
+```
+
 Cache Service
 ---
 To use cache service, only to init it with connection informations, afte that, you can use the data save and retrieve method from ICacheToolService.
@@ -106,8 +112,14 @@ Message Queue Service
 ---
 
 ``` java
+// get the default MQ service which is with RabbitMQ
 IMQToolService mqService=ServiceFactory.getInstance().getDefaultMQService();
-
+// connect server
+mqService.connectServer(BaseMQConfigBean configBean);
+// register the interesting subject, when the subject has message, OnReceiveMsg will receive
+mqService.registerInterestingSubject(String subject,String routingKey,OnReceiveMsg onReceiveMsg);
+// to send the message to queue, now can only broadcast msg to client who are interested
+mqService.sendMsg(String subject,String routingKey,byte[] msg, MQSendType mqSendType);
 
 ```
 RPC Service
