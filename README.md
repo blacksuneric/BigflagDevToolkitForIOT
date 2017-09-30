@@ -96,6 +96,17 @@ To send data to a NBIOT device throug UDP, you need to cache the data first then
 ``` java
 ServiceFactory.getInstance().getDefaultNBIOTService().cacheNBIOTData("00,00", new byte[]{11,22,33,44});
 ```
+#### Encrypted Code Device
+The encrypted code device is a type of IOT device which cannot connect to cloud. It sounds a little weird that an IOT device cannot connect to cloud, but it is true. I have a product which is a door lock. It is installed inside the door, powered by battery, so the power consumption is critical. It can only be BLE, NFC or other low power consumption method to connect to cloud. But for BLE or NFC, it requires user’s phone have such device as connection host. What can user do when user use an old fashion phone? So, the encrypted code device is the solution.
+
+The encrypted code device has a number keyboard, user can obtain the password by any defined means, and input the password into the device, and then the device will verify the password and behaves. The problem is that the password should be changed over time; otherwise once user knows the password, the user can operate the device forever. And again, remember the device cannot connect to cloud, so the only way is that the device and cloud should generate the same password over time. The framework have provide the service for this situation.
+
+``` java
+String deviceCode="1234567";
+// the method use current time and deviceCode to generate the dynamic password, user can use this password to operate device
+// the device will check the input password inside it and caculate the password creation time, if it expires then the password is invalid
+ServiceFactory.getInstance().getDefaultEncryptedCodeDeviceService().getEncryptedCodeForDevice(DateTime.now().toDate(), deviceCode);
+```
 
 Cache Service
 ---
