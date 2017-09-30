@@ -58,7 +58,7 @@ public class IOTLockerDeviceProcessor implements IIOTDeviceProcessor {
         // for UDP connection, the best time to send data is the time when you receivce data from it
         // especially for NBIOT device in China
         socketSession.sendData(new byte[]{11,22});
-		return false;
+		return true;
 	}
 }
 
@@ -70,3 +70,23 @@ public class IOTLockerProcessor extends AbstractIOTDeviceProcessor {
 	}
 }
 ```
+That is it, just two steps to you connect your TCP IOT devices
+#### UDP Service for NBIOT-like device
+To start UPD service for NBIOT-like device is almost the same with TCP, see below codes.
+``` java
+ISocketTCPService socketTcpService=ServiceFactory.getInstance().getDefaultSocketTCPService();
+IIOTHandlerCenter iotHandlerCenter=ServiceFactory.getInstance().getDefaultIOTHandlerCenter();
+// changed from startToListenTCP to startToListenUDP
+socketTcpService.startToListenUDP(listenPort, (sessionID,data)->{
+            // this is where you process the tcp incoming data
+            // changed from processIOTData to processIOTUDPData
+        	iotHandlerCenter.processIOTUDPData(sessionID,(byte[])data);
+		}, (socketSession)->{
+            // this is where tcp session created
+			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+socketTcpService.getAllSocketSessions().size());
+		}, (socketSession)->{
+            // this is where tcp session closed
+			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+socketTcpService.getAllSocketSessions().size());
+		});
+```
+Just changed two parts for UPD connection and for IIOTDeviceProcessor, it will invoke processIOTUDPData(ISocketSession socketSession, byte[] data) 
