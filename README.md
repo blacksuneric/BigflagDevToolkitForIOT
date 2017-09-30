@@ -70,7 +70,7 @@ public class IOTLockerProcessor extends AbstractIOTDeviceProcessor {
 	}
 }
 ```
-That is it, just two steps to you connect your TCP IOT devices
+`That is it, just two steps to connect your TCP IOT devices`
 #### UDP Service for NBIOT-like device
 To start UPD service for NBIOT-like device is almost the same with TCP, see below codes.
 ``` java
