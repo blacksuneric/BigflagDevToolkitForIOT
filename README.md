@@ -74,19 +74,19 @@ public class IOTLockerProcessor extends AbstractIOTDeviceProcessor {
 #### UDP Service for NBIOT-like device
 To start UPD service for NBIOT-like device is almost the same with TCP, see below codes.
 ``` java
-ISocketTCPService socketTcpService=ServiceFactory.getInstance().getDefaultSocketTCPService();
+ISocketUDPService socketUdpService=ServiceFactory.getInstance().getDefaultSocketUDPService();
 IIOTHandlerCenter iotHandlerCenter=ServiceFactory.getInstance().getDefaultIOTHandlerCenter();
 // changed from startToListenTCP to startToListenUDP
-socketTcpService.startToListenUDP(listenPort, (sessionID,data)->{
+socketUdpService.startToListenUDP(listenPort, (sessionID,data)->{
             // this is where you process the tcp incoming data
             // changed from processIOTData to processIOTUDPData
         	iotHandlerCenter.processIOTUDPData(sessionID,(byte[])data);
 		}, (socketSession)->{
             // this is where tcp session created
-			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+socketTcpService.getAllSocketSessions().size());
+			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+socketUdpService.getAllSocketSessions().size());
 		}, (socketSession)->{
             // this is where tcp session closed
-			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+socketTcpService.getAllSocketSessions().size());
+			logger.info("socket session close:"+socketSession.getSessionID()+"sessionCount:"+socketUdpService.getAllSocketSessions().size());
 		});
 ```
 Just changed two parts for UPD connection and for IIOTDeviceProcessor, it will invoke processIOTUDPData(ISocketSession socketSession, byte[] data) 
