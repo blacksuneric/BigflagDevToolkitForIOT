@@ -4,6 +4,8 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import com.bigflag.toolkit.db.impl.C3P0DBService;
 import com.bigflag.toolkit.db.interfaces.IDBService;
+import com.bigflag.toolkit.iot.encryptedcodedevice.impl.DefaultEncryptedCodeDeviceService;
+import com.bigflag.toolkit.iot.encryptedcodedevice.interfaces.IEncryptedCodeDeviceService;
 import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
 import com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter;
 import com.bigflag.toolkit.iot.nbiot.impl.NBIOTService;
@@ -50,6 +52,7 @@ public class ServiceFactory {
 	private final static ISocketUDPService defaultSocketUDPService=new SocketUDPSerivceMinaImpl();
 	private final static IMQToolService defaultMQService=new RabbitMQService();
 	private final static INBIOTService defaultNBIOTService=new NBIOTService();
+	private final static IEncryptedCodeDeviceService defaultEncryptedCodeDeviceService=new DefaultEncryptedCodeDeviceService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -111,5 +114,10 @@ public class ServiceFactory {
 	public INBIOTService getDefaultNBIOTService()
 	{
 		return defaultNBIOTService;
+	}
+	
+	public IEncryptedCodeDeviceService getDefaultEncryptedCodeDeviceService()
+	{
+		return defaultEncryptedCodeDeviceService;
 	}
 }

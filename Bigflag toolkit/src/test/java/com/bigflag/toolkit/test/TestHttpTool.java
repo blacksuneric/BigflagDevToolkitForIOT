@@ -7,12 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.bigflag.toolkit.ioc.ServiceFactory;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
 import com.bigflag.toolkit.tool.http.services.HttpToolHelperFactory;
 
@@ -76,12 +78,14 @@ public class TestHttpTool {
 
 //		byte[] result = impl.postCompressedBytes("http://127.0.0.1:8089", new byte[] { 48, 49, 50 }, HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR,
 //				HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
-		byte[] result=impl.startToPostBytes(new byte[]{11,22,33}).compressBytes(null, null).encryptBytes(null, null).doPostBytes("http");
-		System.out.println(Arrays.toString(result));
-		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR);
-		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
-		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECRYPTER);
-		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_ENCRYPTER);
+//		byte[] result=impl.startToPostBytes(new byte[]{11,22,33}).compressBytes(null, null).encryptBytes(null, null).doPostBytes("http");
+//		System.out.println(Arrays.toString(result));
+//		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_COMPRESSOR);
+//		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
+//		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECRYPTER);
+//		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_ENCRYPTER);
+		String code=ServiceFactory.getInstance().getDefaultEncryptedCodeDeviceService().getEncryptedCodeForDevice(DateTime.now().toDate(), "1234567");
+		System.out.println(code);
 	}
 
 }
