@@ -110,6 +110,7 @@ cacheService.findValueByKey(String key);
 
 Message Queue Service
 ---
+For distributed system, in IOT domain, usually the IOT data will pass to many systems, so the MQ can be used as the IOT data center to distribute to other systems.
 
 ``` java
 // get the default MQ service which is with RabbitMQ
