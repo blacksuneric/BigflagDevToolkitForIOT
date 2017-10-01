@@ -3,6 +3,7 @@
  */
 package com.bigflag.toolkit.db.interfaces;
 
+import com.bigflag.toolkit.db.beans.BaseDBBean;
 import com.bigflag.toolkit.db.beans.BaseSQLQueryRouteInfo;
 
 /***
@@ -29,5 +30,5 @@ import com.bigflag.toolkit.db.beans.BaseSQLQueryRouteInfo;
  *         Create at:2017年9月21日 下午1:30:04
  */
 public interface IDBRouterDispatchService {
-	public BaseSQLQueryRouteInfo findRouteInfo();
+	public BaseSQLQueryRouteInfo findRouteInfo(BaseDBBean baseDBBean);
 }

@@ -3,6 +3,8 @@
  */
 package com.bigflag.toolkit.db.beans;
 
+import java.sql.Connection;
+
 /***
  * 
  * Copyright 2017-2027 the original author or authors.
@@ -24,5 +26,33 @@ package com.bigflag.toolkit.db.beans;
  *         Create at:2017年9月21日 下午1:34:47
  */
 public class BaseSQLQueryRouteInfo {
+	private final Connection dbConnection;
+	
+	public BaseSQLQueryRouteInfo(Builder builder)
+	{
+		this.dbConnection=builder.connection;
+	}
+	public static class Builder
+	{
+		private Connection connection;
+		
+		public Builder()
+		{
+			
+		}
 
+		public void setConnection(Connection connection) {
+			this.connection = connection;
+		}
+		
+		public BaseSQLQueryRouteInfo build()
+		{
+			return new BaseSQLQueryRouteInfo(this);
+		}
+	}
+	public Connection getDbConnection() {
+		return dbConnection;
+	}
+	
+	
 }

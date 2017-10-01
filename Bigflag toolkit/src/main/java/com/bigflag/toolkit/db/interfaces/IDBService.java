@@ -97,5 +97,7 @@ public interface IDBService {
 	Connection getDBConnection() throws SQLException;
 	
 	Connection getDBConnection(BaseDBBean baseDBBean) throws SQLException;
+	
+	void enableSQLRouteDispatchService(IDBRouterDispatchService dbRouteService);
 
 }

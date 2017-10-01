@@ -27,7 +27,9 @@ import org.joda.time.DateTime;
 
 import com.bigflag.toolkit.db.beans.BaseDBBean;
 import com.bigflag.toolkit.db.beans.BaseDBConfigBean;
+import com.bigflag.toolkit.db.beans.BaseSQLQueryRouteInfo;
 import com.bigflag.toolkit.db.enums.DBDataStatus;
+import com.bigflag.toolkit.db.interfaces.IDBRouterDispatchService;
 import com.bigflag.toolkit.db.interfaces.IDBService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -54,6 +56,7 @@ public class C3P0DBService implements IDBService {
 
 	private static DataSource ds;
 	private Map<BaseDBBean, Connection> transactionDBMap = new HashMap<BaseDBBean, Connection>();
+	private IDBRouterDispatchService dbRouterDispatchService = null;
 
 	/*
 	 * (non-Javadoc)
@@ -66,7 +69,7 @@ public class C3P0DBService implements IDBService {
 	public String saveAndReturnUUID(BaseDBBean baseDBBean) {
 		String uuid = UUID.randomUUID().toString();
 		baseDBBean.setUuid(uuid);
-		this.verifyBaseDBBean(baseDBBean,true);
+		this.verifyBaseDBBean(baseDBBean, true);
 		try {
 			Connection conn = this.getDBConnection(baseDBBean);
 			String tableName = this.getClassName(baseDBBean);
@@ -123,7 +126,7 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean update(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean,true);
+		this.verifyBaseDBBean(baseDBBean, true);
 		Connection conn = null;
 		PreparedStatement stat = null;
 		try {
@@ -169,8 +172,7 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}finally
-		{
+		} finally {
 			try {
 				stat.close();
 				conn.close();
@@ -178,11 +180,9 @@ public class C3P0DBService implements IDBService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-
-
 
 	/*
 	 * (non-Javadoc)
@@ -193,7 +193,7 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean deleteSoft(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean,true);
+		this.verifyBaseDBBean(baseDBBean, true);
 		Connection conn = null;
 		PreparedStatement stat = null;
 		try {
@@ -210,8 +210,7 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}finally
-		{
+		} finally {
 			try {
 				stat.close();
 				conn.close();
@@ -219,7 +218,7 @@ public class C3P0DBService implements IDBService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 
 	}
@@ -233,7 +232,7 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean deleteHard(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean,true);
+		this.verifyBaseDBBean(baseDBBean, true);
 		Connection conn = null;
 		PreparedStatement stat = null;
 		try {
@@ -248,8 +247,7 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}finally
-		{
+		} finally {
 			try {
 				stat.close();
 				conn.close();
@@ -257,7 +255,7 @@ public class C3P0DBService implements IDBService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 
 	}
@@ -271,7 +269,7 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public boolean findAndLoad(BaseDBBean baseDBBean) {
-		this.verifyBaseDBBean(baseDBBean,true);
+		this.verifyBaseDBBean(baseDBBean, true);
 		Connection conn = null;
 		PreparedStatement stat = null;
 		ResultSet rs = null;
@@ -321,7 +319,7 @@ public class C3P0DBService implements IDBService {
 	 * (java.lang.String[])
 	 */
 	@Override
-	public boolean findWithAttributesAndLoad(BaseDBBean baseDBBean,String[] attributes) {
+	public boolean findWithAttributesAndLoad(BaseDBBean baseDBBean, String[] attributes) {
 		this.verifyBaseDBBean(baseDBBean, false);
 		Connection conn = null;
 		PreparedStatement stat = null;
@@ -331,17 +329,15 @@ public class C3P0DBService implements IDBService {
 			String tableName = this.getClassName(baseDBBean);
 			StringBuilder sbSQL = new StringBuilder();
 			sbSQL.append("select * from ").append(tableName).append(" where 1=1 ");
-			for(String attribute:attributes)
-			{
+			for (String attribute : attributes) {
 				sbSQL.append(" and ").append(attribute).append(" = ?");
 			}
 			sbSQL.append(" and dataStatus=? limit 0,1;");
 			stat = conn.prepareStatement(sbSQL.toString());
-			for(int i=1;i<=attributes.length;i++)
-			{
-				stat.setObject(i, BeanUtils.getProperty(baseDBBean, attributes[i-1]));
+			for (int i = 1; i <= attributes.length; i++) {
+				stat.setObject(i, BeanUtils.getProperty(baseDBBean, attributes[i - 1]));
 			}
-			stat.setObject(attributes.length+1, DBDataStatus.NORMAL.name());
+			stat.setObject(attributes.length + 1, DBDataStatus.NORMAL.name());
 			rs = stat.executeQuery();
 			ResultSetMetaData data = rs.getMetaData();
 			while (rs.next()) {
@@ -354,11 +350,9 @@ public class C3P0DBService implements IDBService {
 					}
 				}
 			}
-			if(StringUtils.isNotBlank(baseDBBean.getUuid()))
-			{
+			if (StringUtils.isNotBlank(baseDBBean.getUuid())) {
 				return true;
-			}else
-			{
+			} else {
 				return false;
 			}
 		} catch (SQLException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -377,8 +371,6 @@ public class C3P0DBService implements IDBService {
 
 		}
 	}
-
-	
 
 	/*
 	 * (non-Javadoc)
@@ -424,8 +416,7 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}finally
-		{
+		} finally {
 			try {
 				conn.close();
 			} catch (SQLException e) {
@@ -457,8 +448,7 @@ public class C3P0DBService implements IDBService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}finally
-		{
+		} finally {
 			try {
 				conn.close();
 			} catch (SQLException e) {
@@ -477,8 +467,8 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public void createTable(BaseDBBean baseDBBean) {
-		Connection conn=null;
-		Statement stat=null;
+		Connection conn = null;
+		Statement stat = null;
 		try {
 			conn = this.getDBConnection(baseDBBean);
 			String tableName = this.getClassName(baseDBBean);
@@ -508,8 +498,7 @@ public class C3P0DBService implements IDBService {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally
-		{
+		} finally {
 			try {
 				stat.close();
 				conn.close();
@@ -517,7 +506,7 @@ public class C3P0DBService implements IDBService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 
 	}
@@ -582,11 +571,15 @@ public class C3P0DBService implements IDBService {
 	 */
 	@Override
 	public Connection getDBConnection(BaseDBBean baseDBBean) throws SQLException {
-		Connection conn = transactionDBMap.get(baseDBBean);
-		if (conn == null) {
-			conn = this.getDBConnection();
+		if (dbRouterDispatchService != null) {
+			return dbRouterDispatchService.findRouteInfo(baseDBBean).getDbConnection();
+		} else {
+			Connection conn = transactionDBMap.get(baseDBBean);
+			if (conn == null) {
+				conn = this.getDBConnection();
+			}
+			return conn;
 		}
-		return conn;
 	}
 
 	private String getClassName(BaseDBBean baseDBBean) {
@@ -596,12 +589,24 @@ public class C3P0DBService implements IDBService {
 		return baseDBBean.getClass().getSimpleName();
 	}
 
-	private void verifyBaseDBBean(BaseDBBean baseDBBean,boolean isCheckUUID) {
+	private void verifyBaseDBBean(BaseDBBean baseDBBean, boolean isCheckUUID) {
 		if (baseDBBean == null) {
 			throw new NullPointerException("baseDBBean is null");
-		} else if (isCheckUUID&&!StringUtils.isNotBlank(baseDBBean.getUuid())) {
+		} else if (isCheckUUID && !StringUtils.isNotBlank(baseDBBean.getUuid())) {
 			throw new IllegalArgumentException("the db bean uuid cannot be empty");
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.bigflag.toolkit.db.interfaces.IDBService#enableSQLRouteDispatchService
+	 * (com.bigflag.toolkit.db.interfaces.IDBRouterDispatchService)
+	 */
+	@Override
+	public void enableSQLRouteDispatchService(IDBRouterDispatchService dbRouteService) {
+		this.dbRouterDispatchService = dbRouteService;
 	}
 
 }
