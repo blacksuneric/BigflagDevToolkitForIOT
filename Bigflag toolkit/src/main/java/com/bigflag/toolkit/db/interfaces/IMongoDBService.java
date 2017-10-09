@@ -33,4 +33,5 @@ public interface IMongoDBService {
 	public <T> T findOne(IMongoDBQueryBuilder query,Class<T> clazz);
 	public <T> List<T> findMany(IMongoDBQueryBuilder query,Class<T> clazz);
 	public boolean remove(IMongoDBQueryBuilder query,BaseDBBean dbBean);
+	public boolean upsert(String collectionName,BaseDBBean dbBean);
 }
