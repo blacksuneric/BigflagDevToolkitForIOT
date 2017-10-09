@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bigflag.toolkit.db.interfaces;
+package com.bigflag.toolkit.exception;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -20,8 +20,8 @@ package com.bigflag.toolkit.db.interfaces;
  *
  * @author Eric,Liu<br> 
  *		   mail:     34223022@qq.com<br>
- *         Create at: 2017年10月9日 下午9:47:53 
+ *         Create at:下午11:51:58 
  */
-public interface IMongoDBQueryBuilder {
-	public String toJson();
+public class MongoDBServiceNotInitException extends RuntimeException {
+
 }

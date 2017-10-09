@@ -27,7 +27,7 @@ import com.bigflag.toolkit.db.beans.BaseDBBean;
  *         Create at: 2017年10月9日 下午9:16:12 
  */
 public interface IMongoDBService {
-	public boolean connectMongoDB(List<String> hosts,String dbName);
+	public boolean connectMongoDB(String connectURL,String databaseName);
 	public boolean upsertOne(BaseDBBean dbBean);
 	public boolean update(IMongoDBQueryBuilder query,BaseDBBean dbBean);
 	public <T> T findOne(IMongoDBQueryBuilder query,Class<T> clazz);

@@ -5,10 +5,21 @@ package com.bigflag.toolkit.db.impl;
 
 import java.util.List;
 
+import org.bson.Document;
+
+import com.alibaba.fastjson.JSON;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
 import com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder;
 import com.bigflag.toolkit.db.interfaces.IMongoDBService;
-import com.mongodb.Mongo;
+import com.bigflag.toolkit.exception.MongoDBServiceNotInitException;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
+import com.mongodb.ReadPreference;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.InsertOneOptions;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -30,24 +41,29 @@ import com.mongodb.Mongo;
  *         Create at: 2017年10月9日 下午10:07:36 
  */
 public class MongoDBService implements IMongoDBService {
-	private Mongo m;
-	
+	private MongoClient mc;
+	private String databaseName;
 	/* (non-Javadoc)
-	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#connectMongoDB(java.util.List, java.lang.String)
+	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#connectMongoDB(java.lang.String)
 	 */
 	@Override
-	public boolean connectMongoDB(List<String> hosts, String dbName) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean connectMongoDB(String connectURL,String databaseName) {
+		mc=new MongoClient(new MongoClientURI(connectURL
+				,MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred())));
+		this.databaseName=databaseName;
+		return true;
 	}
-
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#upsertOne(com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
 	public boolean upsertOne(BaseDBBean dbBean) {
-		// TODO Auto-generated method stub
-		return false;
+		this.isInit();
+		String collectionName=dbBean.getClass().getSimpleName();
+		MongoDatabase db= mc.getDatabase(databaseName);
+		MongoCollection<Document> collection=db.getCollection(collectionName);
+		collection.insertOne(Document.parse(JSON.toJSONString(dbBean)));
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -64,8 +80,20 @@ public class MongoDBService implements IMongoDBService {
 	 */
 	@Override
 	public <T> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		this.isInit();
+		String collectionName=clazz.getSimpleName();
+		MongoDatabase db= mc.getDatabase(databaseName);
+		MongoCollection<Document> collection=db.getCollection(collectionName);
+		FindIterable<Document> result=collection.find(Document.parse(query.toJson()));
+		Document first=result.first();
+		if(first==null)
+		{
+			return null;
+		}else
+		{
+			return JSON.parseObject(first.toJson(),clazz);
+		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -85,5 +113,14 @@ public class MongoDBService implements IMongoDBService {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	private void isInit()
+	{
+		if(mc==null)
+		{
+			throw new MongoDBServiceNotInitException();
+		}
+	}
+	
 
 }
