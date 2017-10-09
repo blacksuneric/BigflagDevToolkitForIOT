@@ -47,108 +47,108 @@ public class BaseDBBean {
 													"softDeleteTime",
 													"dataStatus"};
 	
-	private static IDBService dbService;
+//	private static IDBService dbService;
 	
-	static{
-		dbService=ServiceFactory.getInstance().getDBService("");
-	}
-	
-	private boolean isDBServiceInit()
-	{
-		return dbService!=null&&dbService.isInit();
-	}
-	
-	public void createTable() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		dbService.createTable(this);
-	}
-	
-	public String save() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.saveAndReturnUUID(this);
-	}
-	
-	public void update() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		dbService.update(this);
-	}
-	
-	
-	public void deleteSoft() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		dbService.deleteSoft(this);
-	}
-	
-	public void deleteHard() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		dbService.deleteHard(this);
-	}
-	
-	public boolean findAndLoad(String uuid) throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		this.setUuid(uuid);
-		return dbService.findAndLoad(this);
-	}
-	
-	public boolean findWithAttributesAndLoad(String ... attributes) throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.findWithAttributesAndLoad(this,attributes);
-	}
-	
-	public boolean startTransaction() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.startTransaction(this);
-	}
-	
-	public boolean commitTransaction() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.commitTransaction(this);
-	}
-	
-	public boolean rollbackTransaction() throws DBServiceNotInitException
-	{
-		if(!isDBServiceInit())
-		{
-			throw new DBServiceNotInitException();
-		}
-		return dbService.rollbackTransaction(this);
-	}
+//	static{
+//		dbService=ServiceFactory.getInstance().getDBService("");
+//	}
+//	
+//	private boolean isDBServiceInit()
+//	{
+//		return dbService!=null&&dbService.isInit();
+//	}
+//	
+//	public void createTable() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		dbService.createTable(this);
+//	}
+//	
+//	public String save() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		return dbService.saveAndReturnUUID(this);
+//	}
+//	
+//	public void update() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		dbService.update(this);
+//	}
+//	
+//	
+//	public void deleteSoft() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		dbService.deleteSoft(this);
+//	}
+//	
+//	public void deleteHard() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		dbService.deleteHard(this);
+//	}
+//	
+//	public boolean findAndLoad(String uuid) throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		this.setUuid(uuid);
+//		return dbService.findAndLoad(this);
+//	}
+//	
+//	public boolean findWithAttributesAndLoad(String ... attributes) throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		return dbService.findWithAttributesAndLoad(this,attributes);
+//	}
+//	
+//	public boolean startTransaction() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		return dbService.startTransaction(this);
+//	}
+//	
+//	public boolean commitTransaction() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		return dbService.commitTransaction(this);
+//	}
+//	
+//	public boolean rollbackTransaction() throws DBServiceNotInitException
+//	{
+//		if(!isDBServiceInit())
+//		{
+//			throw new DBServiceNotInitException();
+//		}
+//		return dbService.rollbackTransaction(this);
+//	}
 
 	public static BaseDBBean newInstance(){
 		return new BaseDBBean();
