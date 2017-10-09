@@ -72,6 +72,12 @@
 			<artifactId>protobuf-java</artifactId>
 			<version>3.4.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.5.0</version>
+		</dependency>
 	</dependencies>
 	<build />
 </project>
