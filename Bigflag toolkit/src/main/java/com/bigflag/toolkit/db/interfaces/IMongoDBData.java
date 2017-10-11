@@ -3,7 +3,8 @@
  */
 package com.bigflag.toolkit.db.interfaces;
 
-/**
+/***
+ * 
  * Copyright 2017-2027 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +21,8 @@ package com.bigflag.toolkit.db.interfaces;
  *
  * @author Eric,Liu<br> 
  *		   mail:     34223022@qq.com<br>
- *         Create at: 2017年10月9日 下午9:47:53 
+ *         Create at:2017年10月12日 上午10:29:26
  */
-public interface IMongoDBQueryBuilder {
-	public String buildJson();
+public interface IMongoDBData {
+	public String retrieveCollectionName();
 }

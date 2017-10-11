@@ -28,9 +28,9 @@ import com.bigflag.toolkit.db.beans.BaseDBBean;
  */
 public interface IMongoDBService {
 	public boolean connectMongoDB(String connectURL,String databaseName);
-	public boolean upsertOne(BaseDBBean dbBean);
-	public boolean update(IMongoDBQueryBuilder query,BaseDBBean dbBean);
-	public <T> T findOne(IMongoDBQueryBuilder query,Class<T> clazz);
+	public boolean upsertOne(IMongoDBData dbBean);
+	public boolean update(IMongoDBQueryBuilder query,IMongoDBData dbBean);
+	public <T extends IMongoDBData> T findOne(IMongoDBQueryBuilder query,Class<T> clazz);
 	public <T> List<T> findMany(IMongoDBQueryBuilder query,Class<T> clazz);
-	public boolean remove(IMongoDBQueryBuilder query,BaseDBBean dbBean);
+	public boolean remove(IMongoDBQueryBuilder query,IMongoDBData dbBean);
 }

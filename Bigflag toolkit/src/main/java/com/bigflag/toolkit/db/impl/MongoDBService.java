@@ -4,14 +4,20 @@
 package com.bigflag.toolkit.db.impl;
 
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
+import com.bigflag.toolkit.db.interfaces.IMongoDBData;
 import com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder;
 import com.bigflag.toolkit.db.interfaces.IMongoDBService;
 import com.bigflag.toolkit.exception.MongoDBServiceNotInitException;
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
@@ -57,9 +63,9 @@ public class MongoDBService implements IMongoDBService {
 	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#upsertOne(com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean upsertOne(BaseDBBean dbBean) {
+	public boolean upsertOne(IMongoDBData dbBean) {
 		this.isInit();
-		String collectionName=dbBean.getClass().getSimpleName();
+		String collectionName=dbBean.retrieveCollectionName();
 		MongoDatabase db= mc.getDatabase(databaseName);
 		MongoCollection<Document> collection=db.getCollection(collectionName);
 		collection.insertOne(Document.parse(JSON.toJSONString(dbBean)));
@@ -70,7 +76,7 @@ public class MongoDBService implements IMongoDBService {
 	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#update(com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder, com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean update(IMongoDBQueryBuilder query, BaseDBBean dbBean) {
+	public boolean update(IMongoDBQueryBuilder query, IMongoDBData dbBean) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -79,20 +85,31 @@ public class MongoDBService implements IMongoDBService {
 	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#findOne(com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder, java.lang.Class)
 	 */
 	@Override
-	public <T> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
+	public <T extends IMongoDBData> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		String collectionName=clazz.getSimpleName();
-		MongoDatabase db= mc.getDatabase(databaseName);
-		MongoCollection<Document> collection=db.getCollection(collectionName);
-		FindIterable<Document> result=collection.find(Document.parse(query.toJson()));
-		Document first=result.first();
-		if(first==null)
-		{
-			return null;
-		}else
-		{
-			return JSON.parseObject(first.toJson(),clazz);
+		IMongoDBData bean;
+		try {
+			bean = (IMongoDBData)clazz.newInstance();
+			String collectionName=bean.retrieveCollectionName();
+			MongoDatabase db= mc.getDatabase(databaseName);
+			MongoCollection<Document> collection=db.getCollection(collectionName);
+			FindIterable<Document> result=collection.find(Document.parse(query.buildJson()));
+			Document first=result.first();
+			if(first==null)
+			{
+				return null;
+			}else
+			{
+				return JSON.parseObject(refineJSONString(first.toJson()), clazz);
+			}
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return null;
 		
 	}
 
@@ -109,7 +126,7 @@ public class MongoDBService implements IMongoDBService {
 	 * @see com.bigflag.toolkit.db.interfaces.IMongoDBService#remove(com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder, com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean remove(IMongoDBQueryBuilder query, BaseDBBean dbBean) {
+	public boolean remove(IMongoDBQueryBuilder query, IMongoDBData dbBean) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -122,5 +139,18 @@ public class MongoDBService implements IMongoDBService {
 		}
 	}
 	
+	
+	private String refineJSONString(String mongoJson)
+	{
+		while(mongoJson.contains("$"))
+		{
+			int index=mongoJson.indexOf("{ \"$");
+			String block=mongoJson.substring(index,mongoJson.indexOf("}", index)+1).intern();
+			index=block.indexOf(": ");
+			String value=block.substring(index+": ".length(), block.indexOf(" }")).intern();
+			mongoJson=mongoJson.replace(block, value).intern();
+		}
+		return mongoJson;
+	}
 
 }
