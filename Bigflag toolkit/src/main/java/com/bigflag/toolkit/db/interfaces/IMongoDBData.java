@@ -25,4 +25,6 @@ package com.bigflag.toolkit.db.interfaces;
  */
 public interface IMongoDBData {
 	public String retrieveCollectionName();
+	public String getMongoID();
+	public void setMongoID(String mongoID);
 }
