@@ -169,7 +169,6 @@ public class MongoDBService implements IMongoDBService {
 					obj.setMongoID(jo.getString("_id"));
 					beans.add((T)obj);
 				}
-
 			});
 			return beans;
 		} catch (InstantiationException e) {
