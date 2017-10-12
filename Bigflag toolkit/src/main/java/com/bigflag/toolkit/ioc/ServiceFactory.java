@@ -1,9 +1,12 @@
 package com.bigflag.toolkit.ioc;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.bigflag.toolkit.db.impl.C3P0DBService;
+import com.bigflag.toolkit.db.impl.MongoDBService;
 import com.bigflag.toolkit.db.interfaces.IDBService;
+import com.bigflag.toolkit.db.interfaces.IMongoDBService;
 import com.bigflag.toolkit.iot.encryptedcodedevice.impl.DefaultEncryptedCodeDeviceService;
 import com.bigflag.toolkit.iot.encryptedcodedevice.interfaces.IEncryptedCodeDeviceService;
 import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
@@ -53,6 +56,7 @@ public class ServiceFactory {
 	private final static IMQToolService defaultMQService=new RabbitMQService();
 	private final static INBIOTService defaultNBIOTService=new NBIOTService();
 	private final static IEncryptedCodeDeviceService defaultEncryptedCodeDeviceService=new DefaultEncryptedCodeDeviceService();
+	private final static IMongoDBService defaultMongoDBService=new MongoDBService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -66,14 +70,114 @@ public class ServiceFactory {
 		return instance;
 	}
 	
-	public IDBService getDBService(String serviceKey)
+	public IDBService getDBService(String serviceClassName)
 	{
-		throw new NotImplementedException("");
+		try {
+			return (IDBService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
 	}
 	
-	public IHttpToolService getHttpToolService(String serviceKey)
+	public IIOTHandlerCenter getIIOTHandlerCenter(String serviceClassName)
 	{
-		throw new NotImplementedException("");
+		try {
+			return (IIOTHandlerCenter) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public IHttpToolService getHttpToolService(String serviceClassName)
+	{
+		try {
+			return (IHttpToolService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public ICacheToolService getCacheToolService(String serviceClassName)
+	{
+		try {
+			return (ICacheToolService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public ISocketTCPService getSocketTCPService(String serviceClassName)
+	{
+		try {
+			return (ISocketTCPService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public ISocketUDPService getSocketUDPService(String serviceClassName)
+	{
+		try {
+			return (ISocketUDPService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public IMQToolService getMQToolService(String serviceClassName)
+	{
+		try {
+			return (IMQToolService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public INBIOTService getNBIOTService(String serviceClassName)
+	{
+		try {
+			return (INBIOTService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public IEncryptedCodeDeviceService getEncryptedCodeDeviceService(String serviceClassName)
+	{
+		try {
+			return (IEncryptedCodeDeviceService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public IMongoDBService getMongoDBService(String serviceClassName)
+	{
+		try {
+			return (IMongoDBService) ClassUtils.getClass(serviceClassName).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
 	}
 	
 	public IDBService getDefaultDBService()
@@ -119,5 +223,10 @@ public class ServiceFactory {
 	public IEncryptedCodeDeviceService getDefaultEncryptedCodeDeviceService()
 	{
 		return defaultEncryptedCodeDeviceService;
+	}
+	
+	public IMongoDBService getDefaultMongoDBService()
+	{
+		return defaultMongoDBService;
 	}
 }
