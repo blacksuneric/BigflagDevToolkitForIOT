@@ -3,8 +3,10 @@
  */
 package com.bigflag.toolkit.db.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -118,7 +120,33 @@ public class MongoDBService implements IMongoDBService {
 	 */
 	@Override
 	public <T> List<T> findMany(IMongoDBQueryBuilder query, Class<T> clazz) {
-		// TODO Auto-generated method stub
+		this.isInit();
+		IMongoDBData bean;
+		try {
+			bean = (IMongoDBData)clazz.newInstance();
+			String collectionName=bean.retrieveCollectionName();
+			MongoDatabase db= mc.getDatabase(databaseName);
+			MongoCollection<Document> collection=db.getCollection(collectionName);
+			FindIterable<Document> result=collection.find(Document.parse(query.buildJson()));
+			List<T> beans=new ArrayList<T>();
+			
+			result.forEach(new Consumer<Document>() {
+
+				@Override
+				public void accept(Document doc) {
+					
+					beans.add(JSON.parseObject(refineJSONString(doc.toJson()), clazz));
+				}
+
+			});
+			return beans;
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
