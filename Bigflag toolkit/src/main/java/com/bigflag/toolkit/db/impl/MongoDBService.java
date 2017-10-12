@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -80,9 +81,9 @@ public class MongoDBService implements IMongoDBService {
 		String collectionName = dbBean.retrieveCollectionName();
 		MongoDatabase db = mc.getDatabase(databaseName);
 		MongoCollection<Document> collection = db.getCollection(collectionName);
-		collection.insertOne(Document.parse(JSON.toJSONString(dbBean)));
-
-		collection.updateOne(new Document().append("_id", dbBean.getMongoID()), Document.parse(JSON.toJSONString(dbBean)),
+		JSONObject jo = (JSONObject) JSON.toJSON(dbBean);
+		jo.remove("mongoID");
+		collection.replaceOne(new Document().append("_id", new ObjectId(dbBean.getMongoID())), Document.parse(jo.toJSONString()),
 				new UpdateOptions().upsert(true));
 		return true;
 	}
@@ -122,12 +123,12 @@ public class MongoDBService implements IMongoDBService {
 			if (first == null) {
 				return null;
 			} else {
-				String json=refineJSONString(first.toJson());
-				JSONObject jo=JSONObject.parseObject(json);
-				IMongoDBData obj=(IMongoDBData)JSON.parseObject(json, clazz);
+				String json = refineJSONString(first.toJson());
+				JSONObject jo = JSONObject.parseObject(json);
+				IMongoDBData obj = (IMongoDBData) JSON.parseObject(json, clazz);
 				obj.setMongoID(jo.getString("_id"));
-				return (T)obj;
-				
+				return (T) obj;
+
 			}
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -163,11 +164,11 @@ public class MongoDBService implements IMongoDBService {
 
 				@Override
 				public void accept(Document doc) {
-					String json=refineJSONString(doc.toJson());
-					JSONObject jo=JSONObject.parseObject(json);
-					IMongoDBData obj=(IMongoDBData)JSON.parseObject(json, clazz);
+					String json = refineJSONString(doc.toJson());
+					JSONObject jo = JSONObject.parseObject(json);
+					IMongoDBData obj = (IMongoDBData) JSON.parseObject(json, clazz);
 					obj.setMongoID(jo.getString("_id"));
-					beans.add((T)obj);
+					beans.add((T) obj);
 				}
 			});
 			return beans;
