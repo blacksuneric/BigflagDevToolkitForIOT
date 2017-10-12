@@ -5,8 +5,11 @@ package com.bigflag.toolkit.db.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -46,8 +49,29 @@ import com.mongodb.client.model.UpdateOptions;
  *         Create at: 2017年10月9日 下午10:07:36
  */
 public class MongoDBService implements IMongoDBService {
+	private Map<Class, String> collectionMap = new ConcurrentHashMap<Class, String>();
 	private MongoClient mc;
 	private String databaseName;
+
+	private String getCollectionName(Class clazz) {
+		String collectionName = collectionMap.get(clazz);
+		if (StringUtils.isNotBlank(collectionName)) {
+			return collectionName;
+		} else {
+			try {
+				BaseDBBean bean = (BaseDBBean) clazz.newInstance();
+				collectionMap.put(clazz, bean.retrieveCollectionName());
+				return bean.retrieveCollectionName();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return "";
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -77,10 +101,8 @@ public class MongoDBService implements IMongoDBService {
 		MongoDatabase db = mc.getDatabase(databaseName);
 		MongoCollection<Document> collection = db.getCollection(collectionName);
 		JSONObject jo = (JSONObject) JSON.toJSON(dbBean);
-		BsonValue  upsertedID = collection
-				.replaceOne(new Document().append("_id", new ObjectId(dbBean.getUuid())), Document.parse(jo.toJSONString()),
-						new UpdateOptions().upsert(true)).getUpsertedId();
-		return upsertedID==null?"":upsertedID.toString();
+		BsonValue upsertedID = collection.replaceOne(new Document().append("_id", new ObjectId(dbBean.getUuid())), Document.parse(jo.toJSONString()), new UpdateOptions().upsert(true)).getUpsertedId();
+		return upsertedID == null ? "" : upsertedID.toString();
 	}
 
 	/*
@@ -112,32 +134,21 @@ public class MongoDBService implements IMongoDBService {
 	@Override
 	public <T extends BaseDBBean> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		BaseDBBean bean;
-		try {
-			bean = (BaseDBBean) clazz.newInstance();
-			String collectionName = bean.retrieveCollectionName();
-			MongoDatabase db = mc.getDatabase(databaseName);
-			MongoCollection<Document> collection = db.getCollection(collectionName);
-			FindIterable<Document> result = collection.find(Document.parse(query.buildJson()));
-			Document first = result.first();
-			if (first == null) {
-				return null;
-			} else {
-				String json = refineJSONString(first.toJson());
-				JSONObject jo = JSONObject.parseObject(json);
-				BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
-				obj.setUuid(jo.getString("_id"));
-				return (T) obj;
+		String collectionName = this.getCollectionName(clazz);
+		MongoDatabase db = mc.getDatabase(databaseName);
+		MongoCollection<Document> collection = db.getCollection(collectionName);
+		FindIterable<Document> result = collection.find(Document.parse(query.buildJson()));
+		Document first = result.first();
+		if (first == null) {
+			return null;
+		} else {
+			String json = refineJSONString(first.toJson());
+			JSONObject jo = JSONObject.parseObject(json);
+			BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
+			obj.setUuid(jo.getString("_id"));
+			return (T) obj;
 
-			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		return null;
 
 	}
 
@@ -151,35 +162,24 @@ public class MongoDBService implements IMongoDBService {
 	@Override
 	public <T extends BaseDBBean> List<T> findMany(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		BaseDBBean bean;
-		try {
-			bean = (BaseDBBean) clazz.newInstance();
-			String collectionName = bean.retrieveCollectionName();
-			MongoDatabase db = mc.getDatabase(databaseName);
-			MongoCollection<Document> collection = db.getCollection(collectionName);
-			FindIterable<Document> result = collection.find(Document.parse(query.buildJson()));
-			List<T> beans = new ArrayList<T>();
+		String collectionName = this.getCollectionName(clazz);
+		MongoDatabase db = mc.getDatabase(databaseName);
+		MongoCollection<Document> collection = db.getCollection(collectionName);
+		FindIterable<Document> result = collection.find(Document.parse(query.buildJson()));
+		List<T> beans = new ArrayList<T>();
 
-			result.forEach(new Consumer<Document>() {
+		result.forEach(new Consumer<Document>() {
 
-				@Override
-				public void accept(Document doc) {
-					String json = refineJSONString(doc.toJson());
-					JSONObject jo = JSONObject.parseObject(json);
-					BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
-					obj.setUuid(jo.getString("_id"));
-					beans.add((T) obj);
-				}
-			});
-			return beans;
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+			@Override
+			public void accept(Document doc) {
+				String json = refineJSONString(doc.toJson());
+				JSONObject jo = JSONObject.parseObject(json);
+				BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
+				obj.setUuid(jo.getString("_id"));
+				beans.add((T) obj);
+			}
+		});
+		return beans;
 	}
 
 	/*
@@ -193,21 +193,10 @@ public class MongoDBService implements IMongoDBService {
 	@Override
 	public <T extends BaseDBBean> long remove(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		BaseDBBean bean;
-		try {
-			bean=(BaseDBBean)clazz.newInstance();
-			String collectionName = bean.retrieveCollectionName();
-			MongoDatabase db = mc.getDatabase(databaseName);
-			MongoCollection<Document> collection = db.getCollection(collectionName);
-			return collection.deleteMany(Document.parse(query.toString())).getDeletedCount();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 0;
+		String collectionName = this.getCollectionName(clazz);
+		MongoDatabase db = mc.getDatabase(databaseName);
+		MongoCollection<Document> collection = db.getCollection(collectionName);
+		return collection.deleteMany(Document.parse(query.toString())).getDeletedCount();
 	}
 
 	private void isInit() {
