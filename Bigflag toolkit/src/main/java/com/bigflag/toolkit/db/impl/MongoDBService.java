@@ -5,22 +5,18 @@ package com.bigflag.toolkit.db.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bigflag.toolkit.db.beans.BaseDBBean;
-import com.bigflag.toolkit.db.interfaces.IMongoDBData;
 import com.bigflag.toolkit.db.interfaces.IMongoDBQueryBuilder;
 import com.bigflag.toolkit.db.interfaces.IMongoDBService;
 import com.bigflag.toolkit.exception.MongoDBServiceNotInitException;
-import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
@@ -28,7 +24,6 @@ import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertOneOptions;
 import com.mongodb.client.model.UpdateOptions;
 
 /**
@@ -76,16 +71,16 @@ public class MongoDBService implements IMongoDBService {
 	 * .toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean upsertOne(IMongoDBData dbBean) {
+	public String upsertOne(BaseDBBean dbBean) {
 		this.isInit();
 		String collectionName = dbBean.retrieveCollectionName();
 		MongoDatabase db = mc.getDatabase(databaseName);
 		MongoCollection<Document> collection = db.getCollection(collectionName);
 		JSONObject jo = (JSONObject) JSON.toJSON(dbBean);
-		jo.remove("mongoID");
-		collection.replaceOne(new Document().append("_id", new ObjectId(dbBean.getMongoID())), Document.parse(jo.toJSONString()),
-				new UpdateOptions().upsert(true));
-		return true;
+		BsonValue  upsertedID = collection
+				.replaceOne(new Document().append("_id", new ObjectId(dbBean.getUuid())), Document.parse(jo.toJSONString()),
+						new UpdateOptions().upsert(true)).getUpsertedId();
+		return upsertedID==null?"":upsertedID.toString();
 	}
 
 	/*
@@ -97,9 +92,14 @@ public class MongoDBService implements IMongoDBService {
 	 * com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean update(IMongoDBQueryBuilder query, IMongoDBData dbBean) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean update(IMongoDBQueryBuilder query, BaseDBBean dbBean) {
+		this.isInit();
+		String collectionName = dbBean.retrieveCollectionName();
+		MongoDatabase db = mc.getDatabase(databaseName);
+		MongoCollection<Document> collection = db.getCollection(collectionName);
+		JSONObject jo = (JSONObject) JSON.toJSON(dbBean);
+		collection.replaceOne(Document.parse(jo.toJSONString()), Document.parse(jo.toJSONString()));
+		return true;
 	}
 
 	/*
@@ -110,11 +110,11 @@ public class MongoDBService implements IMongoDBService {
 	 * .toolkit.db.interfaces.IMongoDBQueryBuilder, java.lang.Class)
 	 */
 	@Override
-	public <T extends IMongoDBData> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
+	public <T extends BaseDBBean> T findOne(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		IMongoDBData bean;
+		BaseDBBean bean;
 		try {
-			bean = (IMongoDBData) clazz.newInstance();
+			bean = (BaseDBBean) clazz.newInstance();
 			String collectionName = bean.retrieveCollectionName();
 			MongoDatabase db = mc.getDatabase(databaseName);
 			MongoCollection<Document> collection = db.getCollection(collectionName);
@@ -125,8 +125,8 @@ public class MongoDBService implements IMongoDBService {
 			} else {
 				String json = refineJSONString(first.toJson());
 				JSONObject jo = JSONObject.parseObject(json);
-				IMongoDBData obj = (IMongoDBData) JSON.parseObject(json, clazz);
-				obj.setMongoID(jo.getString("_id"));
+				BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
+				obj.setUuid(jo.getString("_id"));
 				return (T) obj;
 
 			}
@@ -149,11 +149,11 @@ public class MongoDBService implements IMongoDBService {
 	 * .toolkit.db.interfaces.IMongoDBQueryBuilder, java.lang.Class)
 	 */
 	@Override
-	public <T> List<T> findMany(IMongoDBQueryBuilder query, Class<T> clazz) {
+	public <T extends BaseDBBean> List<T> findMany(IMongoDBQueryBuilder query, Class<T> clazz) {
 		this.isInit();
-		IMongoDBData bean;
+		BaseDBBean bean;
 		try {
-			bean = (IMongoDBData) clazz.newInstance();
+			bean = (BaseDBBean) clazz.newInstance();
 			String collectionName = bean.retrieveCollectionName();
 			MongoDatabase db = mc.getDatabase(databaseName);
 			MongoCollection<Document> collection = db.getCollection(collectionName);
@@ -166,8 +166,8 @@ public class MongoDBService implements IMongoDBService {
 				public void accept(Document doc) {
 					String json = refineJSONString(doc.toJson());
 					JSONObject jo = JSONObject.parseObject(json);
-					IMongoDBData obj = (IMongoDBData) JSON.parseObject(json, clazz);
-					obj.setMongoID(jo.getString("_id"));
+					BaseDBBean obj = (BaseDBBean) JSON.parseObject(json, clazz);
+					obj.setUuid(jo.getString("_id"));
 					beans.add((T) obj);
 				}
 			});
@@ -191,9 +191,23 @@ public class MongoDBService implements IMongoDBService {
 	 * com.bigflag.toolkit.db.beans.BaseDBBean)
 	 */
 	@Override
-	public boolean remove(IMongoDBQueryBuilder query, IMongoDBData dbBean) {
-		// TODO Auto-generated method stub
-		return false;
+	public <T extends BaseDBBean> long remove(IMongoDBQueryBuilder query, Class<T> clazz) {
+		this.isInit();
+		BaseDBBean bean;
+		try {
+			bean=(BaseDBBean)clazz.newInstance();
+			String collectionName = bean.retrieveCollectionName();
+			MongoDatabase db = mc.getDatabase(databaseName);
+			MongoCollection<Document> collection = db.getCollection(collectionName);
+			return collection.deleteMany(Document.parse(query.toString())).getDeletedCount();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	private void isInit() {

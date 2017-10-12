@@ -257,4 +257,9 @@ public class BaseDBBean {
 		this.dataStatus=dataStatus;
 		return this;
 	}
+	
+	public String retrieveCollectionName()
+	{
+		return this.getClass().getSimpleName();
+	}
 }
