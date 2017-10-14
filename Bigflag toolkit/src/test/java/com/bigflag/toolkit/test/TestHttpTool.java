@@ -3,20 +3,20 @@
  */
 package com.bigflag.toolkit.test;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import org.joda.time.DateTime;
+import org.apache.commons.lang3.ClassUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.bigflag.toolkit.ioc.ServiceFactory;
-import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
-import com.bigflag.toolkit.tool.http.services.HttpToolHelperFactory;
+import com.bigflag.toolkit.RPC.DefaultRemoteCallService;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -69,7 +69,7 @@ public class TestHttpTool {
 
 	@Test
 	public void test() {
-		DefaultHttpPostToolImpl impl = new DefaultHttpPostToolImpl();
+//		DefaultHttpPostToolImpl impl = new DefaultHttpPostToolImpl();
 		// Map<String,String> params=new HashMap<String,String>();
 		// params.put("key1", "value1");
 		// params.put("key2", "value2");
@@ -84,8 +84,41 @@ public class TestHttpTool {
 //		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECOMPRESSOR);
 //		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_DECRYPTER);
 //		System.out.println(HttpToolHelperFactory.NOTHING_TO_DO_ENCRYPTER);
-		String code=ServiceFactory.getInstance().getDefaultEncryptedCodeDeviceService().getEncryptedCodeForDevice(DateTime.now().toDate(), "1234567");
-		System.out.println(code);
+//		String code=ServiceFactory.getInstance().getDefaultEncryptedCodeDeviceService().getEncryptedCodeForDevice(DateTime.now().toDate(), "1234567");
+//		System.out.println(code);
+		
+//		Class[] cs = {ITestRemote.class};
+//		
+//		Object obj =Proxy.newProxyInstance(ITestRemote.class.getClassLoader(), 
+//				cs, new InvocationHandler() {
+//			@Override
+//			public Object invoke(Object arg0, Method arg1, Object[] arg2) throws Throwable {
+//				System.out.println(arg1.getName()+" hello");
+//				if(arg1.getReturnType().getTypeName().equals("int"))
+//				{
+//					return 1;
+//				}else if(arg1.getReturnType().getTypeName().equals(String.class.getTypeName()))
+//				{
+//					return "asdf";
+//				}
+//				return null;
+//			}
+//		});
+		
+		DefaultRemoteCallService callService=new DefaultRemoteCallService();
+		ITestRemote test=callService.buildStub(ITestRemote.class);
+		
+		System.out.println(test.add(1, 2));
+		System.out.println(test.minus(2, 3));
+		System.out.println(test.add(1, 2));
+		System.out.println(test.minus(2, 3));
+//		List<Class<?>> classes=ClassUtils.getAllInterfaces(obj.getClass());
+//		for(Class<?> clazz:classes)
+//		{
+//			System.out.println(clazz);
+//		}
+//		System.out.println(obj.getClass());
+		
 	}
 
 }
