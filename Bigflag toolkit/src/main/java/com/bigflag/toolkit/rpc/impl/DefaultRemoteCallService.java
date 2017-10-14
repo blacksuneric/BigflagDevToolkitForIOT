@@ -3,18 +3,21 @@
  */
 package com.bigflag.toolkit.rpc.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.List;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ClassUtils;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import com.bigflag.toolkit.exception.RPCServiceNotInitException;
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
+import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf;
+import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf.Message.Builder;
 import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
-import com.bigflag.toolkit.test.ITestRemote;
+import com.google.protobuf.ByteString;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -38,7 +41,7 @@ import com.bigflag.toolkit.test.ITestRemote;
 public class DefaultRemoteCallService implements IRemoteCallService {
 
 	private boolean isInit=true;
-	
+	private Map<Object,byte[]> objectBytesCache=new WeakHashMap<Object, byte[]>();
 	/* (non-Javadoc)
 	 * @see com.bigflag.toolkit.RPC.IRemoteCallService#buildStub(java.lang.Class)
 	 */
@@ -54,7 +57,17 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 				} else if (method.getReturnType().getTypeName().equals(String.class.getTypeName())) {
 					return "asdf";
 				}
-				return "result returned";
+				Builder builder=RPCMessageProtobuf.Message.newBuilder()
+					.setInterfaceFullName(clazz.getName())
+					.setVersion(1)
+					.setMethodName(method.getName());
+				for(Object arg:args)
+				{
+					builder.addMethodParameter(ByteString.copyFrom(objectToByteArray(arg)));
+				}
+				byte[] sentRemoteInterfaceData=builder.build().toByteArray();
+				throw new Exception("sdf");
+//				return "result returned";
 			}
 		});
 		return (T)obj;
@@ -76,5 +89,42 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 			throw new RPCServiceNotInitException();
 		}
 	}
+	
+    public byte[] objectToByteArray(Object obj) {
+        byte[] bytes = objectBytesCache.get(obj);
+        if(bytes!=null)
+        {
+        	return bytes;
+        }
+        ByteArrayOutputStream byteArrayOutputStream = null;
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(obj);
+            objectOutputStream.flush();
+            bytes = byteArrayOutputStream.toByteArray();
+            objectBytesCache.put(obj, bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (objectOutputStream != null) {
+                try {
+                    objectOutputStream.close();
+                } catch (IOException e) {
+                	e.printStackTrace();
+                }
+            }
+            if (byteArrayOutputStream != null) {
+                try {
+                    byteArrayOutputStream.close();
+                } catch (IOException e) {
+                	e.printStackTrace();
+                }
+            }
+
+        }
+        return bytes;
+    }
 
 }
