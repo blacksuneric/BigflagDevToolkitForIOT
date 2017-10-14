@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.bigflag.toolkit.rpc.DefaultRemoteCallService;
+import com.bigflag.toolkit.rpc.impl.DefaultRemoteCallService;
 
 /**
  * Copyright 2017-2027 the original author or authors.

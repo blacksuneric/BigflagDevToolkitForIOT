@@ -1,7 +1,9 @@
 /**
  * 
  */
-package com.bigflag.toolkit.rpc;
+package com.bigflag.toolkit.rpc.interfaces;
+
+import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 
 /**
  * Copyright 2017-2027 the original author or authors.

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bigflag.toolkit.rpc;
+package com.bigflag.toolkit.rpc.impl;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -12,6 +12,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 
 import com.bigflag.toolkit.exception.RPCServiceNotInitException;
+import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
+import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
 import com.bigflag.toolkit.test.ITestRemote;
 
 /**
