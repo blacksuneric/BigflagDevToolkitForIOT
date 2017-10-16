@@ -129,7 +129,7 @@ public class DefaultRemoteCallService implements IRemoteCallService {
         return bytes;
     }
     
-    private List<RemoteInterfaceInfoProtobuf> quertRemoteInterfaceInfo(String fullInterfaceName,int version,List<String> tags)
+    private List<RemoteInterfaceInfoProtobuf> queryRemoteInterfaceInfo(String fullInterfaceName,int version,List<String> tags)
     {
     	return null;
     }
