@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -16,6 +17,7 @@ import com.bigflag.toolkit.exception.RPCServiceNotInitException;
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf.Message.Builder;
+import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
 import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
 import com.google.protobuf.ByteString;
 
@@ -125,6 +127,11 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 
         }
         return bytes;
+    }
+    
+    private List<RemoteInterfaceInfoProtobuf> quertRemoteInterfaceInfo(String fullInterfaceName,int version,List<String> tags)
+    {
+    	return null;
     }
 
 }
