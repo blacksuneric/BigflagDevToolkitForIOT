@@ -19,6 +19,8 @@ import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf.Message.Builder;
 import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
 import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
+import com.bigflag.toolkit.tool.coordinator.impl.DefaultZooKeeperCoordinatorService;
+import com.bigflag.toolkit.tool.coordinator.interfaces.ICoordinatorToolService;
 import com.google.protobuf.ByteString;
 
 /**
@@ -41,7 +43,7 @@ import com.google.protobuf.ByteString;
  *         Create at:2017年10月14日 下午7:09:36
  */
 public class DefaultRemoteCallService implements IRemoteCallService {
-
+	private ICoordinatorToolService zookeeperService=new DefaultZooKeeperCoordinatorService();
 	private boolean isInit=true;
 	private Map<Object,byte[]> objectBytesCache=new WeakHashMap<Object, byte[]>();
 	/* (non-Javadoc)
@@ -80,6 +82,7 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 	 */
 	@Override
 	public boolean connectToESB(BaseRPCConfig esbConfig) {
+		
 		this.isInit=true;
 		return false;
 	}
