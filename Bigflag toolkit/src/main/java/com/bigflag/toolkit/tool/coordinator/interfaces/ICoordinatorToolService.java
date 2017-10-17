@@ -3,6 +3,8 @@
  */
 package com.bigflag.toolkit.tool.coordinator.interfaces;
 
+import java.util.List;
+
 import com.bigflag.toolkit.tool.coordinator.beans.BaseCoordinatorConfigBean;
 
 /***
@@ -28,4 +30,17 @@ import com.bigflag.toolkit.tool.coordinator.beans.BaseCoordinatorConfigBean;
 public interface ICoordinatorToolService {
 	public boolean isInit();
 	public boolean connectServer(BaseCoordinatorConfigBean configBean);
+	public byte[] getNodeData(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
+	public List<String> getNodeChildren(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
+	public boolean existNode(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
+	public boolean removePath(String nodePath);
+	public boolean createPersistentPath(String nodePath,byte[] data,boolean isSequential);
+	public boolean createEphemeralPath(String nodePath,byte[] data,boolean isSequential);
+	public boolean setData(String nodePath,byte[] data);
+	
+	
+	public interface OnDataWatchNodeChanged
+	{
+		public void processNodeChange(int eventType,String nodePath);
+	}
 }

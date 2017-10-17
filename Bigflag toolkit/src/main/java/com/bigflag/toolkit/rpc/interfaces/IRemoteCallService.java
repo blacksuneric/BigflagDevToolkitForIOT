@@ -4,6 +4,7 @@
 package com.bigflag.toolkit.rpc.interfaces;
 
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
+import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -27,4 +28,5 @@ import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 public interface IRemoteCallService {
 	public boolean connectToESB(BaseRPCConfig esbConfig);
 	public <T> T buildStub(Class<T> clazz);
+	public boolean regiesterServiceToESB(RemoteInterfaceInfoProtobuf interfaceInfo);
 }

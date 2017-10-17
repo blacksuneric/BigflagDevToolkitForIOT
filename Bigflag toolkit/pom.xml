@@ -78,6 +78,13 @@
 			<artifactId>mongodb-driver</artifactId>
 			<version>3.5.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper -->
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.4.10</version>
+		</dependency>
+
 	</dependencies>
 	<build />
 </project>
