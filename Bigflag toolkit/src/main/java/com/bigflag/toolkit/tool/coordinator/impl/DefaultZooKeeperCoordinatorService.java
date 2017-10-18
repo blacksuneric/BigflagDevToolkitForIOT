@@ -4,6 +4,7 @@
 package com.bigflag.toolkit.tool.coordinator.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.CreateMode;
@@ -39,7 +40,6 @@ import com.bigflag.toolkit.tool.coordinator.interfaces.ICoordinatorToolService;
  */
 public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolService, Watcher {
 	private ZooKeeper zk;
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -119,6 +119,8 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 		}
 		return new byte[] {};
 	}
+	
+	
 
 	private class GetDataWatcher implements Watcher {
 
@@ -172,11 +174,59 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 	 * .interfaces.ICoordinatorToolService.OnDataWatchNodeChanged)
 	 */
 	@Override
-	public List<String> getNodeChildren(String nodePath, boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<String> getNodeChildren(String nodePath, boolean repeatedWatchChange, OnNodeChildChanged onNodeChildChanged) {
+		try {
+			if(!repeatedWatchChange)
+			{
+				List<String> childNodes = zk.getChildren(nodePath, false);
+				return childNodes;
+			}else
+			{
+				List<String> childNodes = zk.getChildren(nodePath, new GetNodeChildWatcher(onNodeChildChanged));
+				return childNodes;
+			}
+		} catch (KeeperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<String>();
 	}
 
+	private class GetNodeChildWatcher implements Watcher
+	{
+
+		private OnNodeChildChanged onNodeChildChanged;
+		
+		
+		public GetNodeChildWatcher(OnNodeChildChanged onNodeChildChanged) {
+			super();
+			this.onNodeChildChanged = onNodeChildChanged;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
+		 */
+		@Override
+		public void process(WatchedEvent event) {
+			List<String> childNodes;
+			try {
+				childNodes = zk.getChildren(event.getPath(), this);
+				onNodeChildChanged.processNodeChildChanged(event.getType().getIntValue(),event.getPath(),childNodes);
+			} catch (KeeperException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -248,7 +298,16 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 	 */
 	@Override
 	public boolean removePath(String nodePath) {
-		// TODO Auto-generated method stub
+		try {
+			zk.delete(nodePath, -1);
+			return true;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeeperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 
@@ -313,7 +372,16 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 	 */
 	@Override
 	public boolean setData(String nodePath, byte[] data) {
-		// TODO Auto-generated method stub
+		try {
+			zk.setData(nodePath, data, -1);
+			return true;
+		} catch (KeeperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 

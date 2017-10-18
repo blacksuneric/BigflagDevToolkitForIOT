@@ -31,7 +31,7 @@ public interface ICoordinatorToolService {
 	public boolean isInit();
 	public boolean connectServer(BaseCoordinatorConfigBean configBean);
 	public byte[] getNodeData(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
-	public List<String> getNodeChildren(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
+	public List<String> getNodeChildren(String nodePath,boolean repeatedWatchChange, OnNodeChildChanged onNodeChildChanged);
 	public boolean existNode(String nodePath,boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged);
 	public boolean removePath(String nodePath);
 	public boolean createPersistentPath(String nodePath,byte[] data,boolean isSequential);
@@ -42,5 +42,10 @@ public interface ICoordinatorToolService {
 	public interface OnDataWatchNodeChanged
 	{
 		public void processNodeChange(int eventType,String nodePath,byte[] data);
+	}
+	
+	public interface OnNodeChildChanged
+	{
+		public void processNodeChildChanged(int eventType,String nodePath,List<String> chiildNodes);
 	}
 }
