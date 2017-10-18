@@ -147,6 +147,10 @@ Coordination Service
 ---
 WIP
 
+ESB
+---
+WIP
+
 DB Service
 ---
 WIP
