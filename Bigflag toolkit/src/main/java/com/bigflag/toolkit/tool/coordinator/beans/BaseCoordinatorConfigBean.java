@@ -2,7 +2,6 @@
  * 
  */
 package com.bigflag.toolkit.tool.coordinator.beans;
-
 /***
  * 
  * Copyright 2017-2027 the original author or authors.
@@ -20,9 +19,46 @@ package com.bigflag.toolkit.tool.coordinator.beans;
  * limitations under the License.
  *
  * @author Eric,Liu<br> 
- *		   mail:     34223022@qq.com<br>
- *         Create at:2017å¹´9æœˆ21æ—¥ ä¸‹åˆ1:22:10
+ *   mail:     34223022@qq.com<br>
+ *         Create at:2017Äê9ÔÂ21ÈÕ ÏÂÎç1:22:10
  */
-public class BaseCoordinatorConfigBean {
+public final class BaseCoordinatorConfigBean {
+	private final String connectUrl;
+	private final int timeout;
+
+
+	public String getConnectUrl(){
+		return this.connectUrl;
+	}
+
+	public int getTimeout(){
+		return this.timeout;
+	}
+
+	private BaseCoordinatorConfigBean(Builder builder) {
+		super();
+		this.connectUrl = builder.connectUrl;
+		this.timeout = builder.timeout;
+	}
+
+	public static class Builder{
+		private String connectUrl;
+		private int timeout;
+	
+
+		public Builder connectUrl(String connectUrl){
+			this.connectUrl=connectUrl;
+			return this;
+		}	
+
+		public Builder timeout(int timeout){
+			this.timeout=timeout;
+			return this;
+		}
+
+		public BaseCoordinatorConfigBean build(){
+			return new BaseCoordinatorConfigBean(this);
+		}
+	}
 
 }

@@ -41,6 +41,6 @@ public interface ICoordinatorToolService {
 	
 	public interface OnDataWatchNodeChanged
 	{
-		public void processNodeChange(int eventType,String nodePath);
+		public void processNodeChange(int eventType,String nodePath,byte[] data);
 	}
 }
