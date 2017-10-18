@@ -109,7 +109,7 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 						@Override
 						public void process(WatchedEvent event) {
 							if(onDataWatchNodeChanged!=null)
-							{
+							{ 
 								onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(),null);
 							}
 						}
