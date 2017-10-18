@@ -52,11 +52,9 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 		// TODO Auto-generated method stub
 		return zk != null;
 	}
-	
-	private void checkInit()
-	{
-		if(!isInit())
-		{
+
+	private void checkInit() {
+		if (!isInit()) {
 			throw new CoordinatorServiceNotInitException();
 		}
 	}
@@ -103,17 +101,10 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 					return new byte[] {};
 				}
 			} else {
-				stat = zk.exists(nodePath, false);
+				GetDataWatcher watcher=new GetDataWatcher(onDataWatchNodeChanged);
+				stat = zk.exists(nodePath, watcher);
 				if (stat != null) {
-					byte[] data = zk.getData(nodePath, new Watcher() {
-						@Override
-						public void process(WatchedEvent event) {
-							if(onDataWatchNodeChanged!=null)
-							{ 
-								onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(),null);
-							}
-						}
-					}, null);
+					byte[] data = zk.getData(nodePath, watcher, null);
 					return data;
 				} else {
 					return new byte[] {};
@@ -128,6 +119,49 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 		}
 		return new byte[] {};
 	}
+
+	private class GetDataWatcher implements Watcher {
+
+		private OnDataWatchNodeChanged onDataWatchNodeChanged;
+
+		/**
+		 * @param onDataWatchNodeChanged
+		 */
+		public GetDataWatcher(OnDataWatchNodeChanged onDataWatchNodeChanged) {
+			super();
+			this.onDataWatchNodeChanged = onDataWatchNodeChanged;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent
+		 * )
+		 */
+		@Override
+		public void process(WatchedEvent event) {
+			Stat stat;
+			try {
+				stat = zk.exists(event.getPath(), this);
+				if (stat != null) {
+					byte[] data = zk.getData(event.getPath(), this, null);
+					onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(), data);
+				} else {
+					onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(), new byte[] {});
+				}
+			} catch (KeeperException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -156,12 +190,10 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 	public boolean existNode(String nodePath, boolean repeatedWatchChange, OnDataWatchNodeChanged onDataWatchNodeChanged) {
 		this.checkInit();
 		try {
-			if(!repeatedWatchChange)
-			{
-				return zk.exists(nodePath, false)==null;
-			}else
-			{
-				return zk.exists(nodePath,new ExistWatcher(onDataWatchNodeChanged))==null;
+			if (!repeatedWatchChange) {
+				return zk.exists(nodePath, false) == null;
+			} else {
+				return zk.exists(nodePath, new ExistWatcher(onDataWatchNodeChanged)) == null;
 			}
 		} catch (KeeperException e) {
 			// TODO Auto-generated catch block
@@ -173,15 +205,19 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 		return false;
 	}
 
-	private class ExistWatcher implements Watcher
-	{
+	private class ExistWatcher implements Watcher {
 		private OnDataWatchNodeChanged onDataWatchNodeChanged;
-		/* (non-Javadoc)
-		 * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent
+		 * )
 		 */
 		@Override
 		public void process(WatchedEvent event) {
-			onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(),null);
+			onDataWatchNodeChanged.processNodeChange(event.getType().getIntValue(), event.getPath(), null);
 			try {
 				zk.exists(event.getPath(), this);
 			} catch (KeeperException e) {
@@ -200,9 +236,9 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 			super();
 			this.onDataWatchNodeChanged = onDataWatchNodeChanged;
 		}
-		
+
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
