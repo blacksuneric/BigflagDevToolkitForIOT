@@ -13,6 +13,8 @@ import com.bigflag.toolkit.iot.impl.DefaultIOTHandlerCenter;
 import com.bigflag.toolkit.iot.interfaces.IIOTHandlerCenter;
 import com.bigflag.toolkit.iot.nbiot.impl.NBIOTService;
 import com.bigflag.toolkit.iot.nbiot.interfaces.INBIOTService;
+import com.bigflag.toolkit.rpc.impl.DefaultRemoteCallService;
+import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
 import com.bigflag.toolkit.tool.cache.impl.RedisCacheImpl;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
@@ -57,6 +59,7 @@ public class ServiceFactory {
 	private final static INBIOTService defaultNBIOTService=new NBIOTService();
 	private final static IEncryptedCodeDeviceService defaultEncryptedCodeDeviceService=new DefaultEncryptedCodeDeviceService();
 	private final static IMongoDBService defaultMongoDBService=new MongoDBService();
+	private final static IRemoteCallService defaultRemoteCallService=new DefaultRemoteCallService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -228,5 +231,10 @@ public class ServiceFactory {
 	public IMongoDBService getDefaultMongoDBService()
 	{
 		return defaultMongoDBService;
+	}
+	
+	public IRemoteCallService getDefaultRemoteCallService()
+	{
+		return defaultRemoteCallService;
 	}
 }

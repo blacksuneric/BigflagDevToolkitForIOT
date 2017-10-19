@@ -3,8 +3,11 @@
  */
 package com.bigflag.toolkit.rpc.interfaces;
 
+import java.util.List;
+
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
+import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf.Message;
 
 /**
  * Copyright 2017-2027 the original author or authors.
@@ -28,5 +31,6 @@ import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
 public interface IRemoteCallService {
 	public boolean connectToESB(BaseRPCConfig esbConfig);
 	public <T> T buildStub(Class<T> clazz);
-	public boolean regiesterServiceToESB(RemoteInterfaceInfoProtobuf interfaceInfo);
+	public boolean regiesterServiceToESB(RemoteInterfaceInfoProtobuf.Message interfaceInfo);
+	public List<Message> queryRemoteInterfaceInfo(String fullInterfaceName, int version, List<String> tags);
 }
