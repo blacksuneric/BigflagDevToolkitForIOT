@@ -3,6 +3,12 @@
  */
 package com.bigflag.toolkit.tool.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.joda.time.DateTime;
 
 /***
@@ -38,21 +44,20 @@ public class BigflagTools {
 		}
 		return sb.substring(0, sb.length() - 1);
 	}
-	
+
 	public static byte[] hexStringToBytes(String hexStrings) {
 		String[] hexs = hexStrings.split(",");
 		byte[] bs = new byte[hexs.length];
 		for (int i = 0; i < bs.length; i++) {
-			if(hexs[i].length()==1)
-			{
-				hexs[i]="0"+hexs[i];
+			if (hexs[i].length() == 1) {
+				hexs[i] = "0" + hexs[i];
 			}
 			bs[i] = uniteBytes(hexs[i].substring(0, 1), hexs[i].substring(1, 2));
 		}
 
 		return bs;
 	}
-	
+
 	public static String getXorString(String hexStr) {
 		if (hexStr.contains(",")) {
 			hexStr = hexStr.replace(",", "");
@@ -70,12 +75,11 @@ public class BigflagTools {
 		return xorr;
 
 	}
-	
-	public static String getCurrentTimeLongStr()
-	{
+
+	public static String getCurrentTimeLongStr() {
 		return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
 	}
-	
+
 	public static byte uniteBytes(String src0, String src1) {
 
 		byte b0 = Byte.decode("0x" + src0).byteValue();
@@ -83,5 +87,70 @@ public class BigflagTools {
 		byte b1 = Byte.decode("0x" + src1).byteValue();
 		byte ret = (byte) (b0 | b1);
 		return ret;
+	}
+
+	public static byte[] objectToByteArray(Object obj) {
+		byte[] bytes = null;
+		ByteArrayOutputStream byteArrayOutputStream = null;
+		ObjectOutputStream objectOutputStream = null;
+		try {
+			byteArrayOutputStream = new ByteArrayOutputStream();
+			objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+			objectOutputStream.writeObject(obj);
+			objectOutputStream.flush();
+			bytes = byteArrayOutputStream.toByteArray();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (objectOutputStream != null) {
+				try {
+					objectOutputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (byteArrayOutputStream != null) {
+				try {
+					byteArrayOutputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return bytes;
+	}
+	
+	public static <T> T byteArrayToObject(byte[] bytes,Class<T> clazz)
+	{
+		ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(bytes);
+		ObjectInputStream objectInputStream=null;
+		try {
+			objectInputStream=new ObjectInputStream(byteArrayInputStream);
+			return (T)objectInputStream.readObject();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (objectInputStream != null) {
+				try {
+					objectInputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (byteArrayInputStream != null) {
+				try {
+					byteArrayInputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return null;
 	}
 }

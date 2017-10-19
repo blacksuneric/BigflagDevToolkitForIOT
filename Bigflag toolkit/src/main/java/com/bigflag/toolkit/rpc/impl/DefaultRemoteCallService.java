@@ -16,11 +16,13 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.zookeeper.server.quorum.SendAckRequestProcessor;
 import org.joda.time.DateTime;
 
 import com.bigflag.toolkit.exception.RPCServiceNotInitException;
+import com.bigflag.toolkit.ioc.ServiceFactory;
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf.Message.Builder;
@@ -29,6 +31,7 @@ import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
 import com.bigflag.toolkit.tool.coordinator.beans.BaseCoordinatorConfigBean;
 import com.bigflag.toolkit.tool.coordinator.impl.DefaultZooKeeperCoordinatorService;
 import com.bigflag.toolkit.tool.coordinator.interfaces.ICoordinatorToolService;
+import com.bigflag.toolkit.tool.utils.BigflagTools;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -69,23 +72,58 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 		Object obj = Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				System.out.println("invoke " + method.getName() + " hello");
+				
+				RemoteInterfaceInfoProtobuf.Message remoteService=getOneService(clazz.getName(), 1, null);
+				byte[] resultData=null;
+				if(remoteService!=null)
+				{
+					String serviceURI=remoteService.getServiceURI();
+					
+					Builder builder = RPCMessageProtobuf.Message.newBuilder().setInterfaceFullName(clazz.getName()).setVersion(1)
+							.setMethodName(method.getName());
+					if(args!=null)
+					{
+						for (Object arg : args) {
+							builder.addMethodParameter(ByteString.copyFrom(convertObjToBytes(arg)));
+						}
+					}
+					byte[] sentRemoteInterfaceData = builder.build().toByteArray();
+					resultData=ServiceFactory.getInstance().getDefaultHttpPostToolImpl().doPostBytes(serviceURI, sentRemoteInterfaceData);
+				}
+				
 				if (method.getReturnType().getTypeName().equals("int")) {
-					return 1;
+					if(resultData==null)
+					{
+						return Integer.MIN_VALUE;
+					}else
+					{
+						Integer.parseInt(new String(resultData).intern());
+					}
 				} else if (method.getReturnType().getTypeName().equals(String.class.getTypeName())) {
-					return "asdf";
+					if(resultData==null)
+					{
+						return "";
+					}else
+					{
+						return new String(resultData).intern();
+					}
 				}
-				Builder builder = RPCMessageProtobuf.Message.newBuilder().setInterfaceFullName(clazz.getName()).setVersion(1)
-						.setMethodName(method.getName());
-				for (Object arg : args) {
-					builder.addMethodParameter(ByteString.copyFrom(objectToByteArray(arg)));
-				}
-				byte[] sentRemoteInterfaceData = builder.build().toByteArray();
-				throw new Exception("sdf");
-				// return "result returned";
+				return new Object();
 			}
 		});
 		return (T) obj;
+	}
+	
+	private RemoteInterfaceInfoProtobuf.Message getOneService(String fullInterfaceName, int version, List<String> tags)
+	{
+		List<RemoteInterfaceInfoProtobuf.Message> remoteServices=queryRemoteInterfaceInfo(fullInterfaceName, 1, null);
+		if(remoteServices.size()>0)
+		{
+			return remoteServices.get(0);
+		}else
+		{
+			return null;
+		}
 	}
 
 	/*
@@ -114,40 +152,18 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 		}
 	}
 
-	public byte[] objectToByteArray(Object obj) {
-		byte[] bytes = objectBytesCache.get(obj);
-		if (bytes != null) {
+	private byte[] convertObjToBytes(Object obj)
+	{
+		byte[] bytes=objectBytesCache.get(obj);
+		if(bytes!=null)
+		{
+			return bytes;
+		}else
+		{
+			bytes=BigflagTools.objectToByteArray(obj);
+			objectBytesCache.put(obj, bytes);
 			return bytes;
 		}
-		ByteArrayOutputStream byteArrayOutputStream = null;
-		ObjectOutputStream objectOutputStream = null;
-		try {
-			byteArrayOutputStream = new ByteArrayOutputStream();
-			objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-			objectOutputStream.writeObject(obj);
-			objectOutputStream.flush();
-			bytes = byteArrayOutputStream.toByteArray();
-			objectBytesCache.put(obj, bytes);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (objectOutputStream != null) {
-				try {
-					objectOutputStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (byteArrayOutputStream != null) {
-				try {
-					byteArrayOutputStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-		return bytes;
 	}
 
 	@Override
