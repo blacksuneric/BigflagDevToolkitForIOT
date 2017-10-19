@@ -28,5 +28,5 @@ import com.bigflag.toolkit.rpc.beans.RemoteInterfaceInfoProtobuf;
 public interface IRemoteCallService {
 	public boolean connectToESB(BaseRPCConfig esbConfig);
 	public <T> T buildStub(Class<T> clazz);
-	public boolean regiesterServiceToESB(RemoteInterfaceInfoProtobuf interfaceInfo);
+	public boolean regiesterServiceToESB(RemoteInterfaceInfoProtobuf.Message interfaceInfo);
 }

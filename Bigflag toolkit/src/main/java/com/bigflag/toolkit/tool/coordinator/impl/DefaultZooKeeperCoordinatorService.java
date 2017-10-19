@@ -241,9 +241,9 @@ public class DefaultZooKeeperCoordinatorService implements ICoordinatorToolServi
 		this.checkInit();
 		try {
 			if (!repeatedWatchChange) {
-				return zk.exists(nodePath, false) == null;
+				return zk.exists(nodePath, false) != null;
 			} else {
-				return zk.exists(nodePath, new ExistWatcher(onDataWatchNodeChanged)) == null;
+				return zk.exists(nodePath, new ExistWatcher(onDataWatchNodeChanged)) != null;
 			}
 		} catch (KeeperException e) {
 			// TODO Auto-generated catch block

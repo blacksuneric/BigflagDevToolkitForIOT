@@ -112,6 +112,25 @@ public final class RemoteInterfaceInfoProtobuf {
      */
     com.google.protobuf.ByteString
         getInvokeTypeBytes();
+
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    java.util.List<java.lang.String>
+        getTagsList();
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    int getTagsCount();
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    java.lang.String getTags(int index);
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    com.google.protobuf.ByteString
+        getTagsBytes(int index);
   }
   /**
    * Protobuf type {@code Message}
@@ -134,6 +153,7 @@ public final class RemoteInterfaceInfoProtobuf {
       invokeWeight_ = 0;
       serviceProvider_ = "";
       invokeType_ = "";
+      tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
 
     @java.lang.Override
@@ -209,6 +229,15 @@ public final class RemoteInterfaceInfoProtobuf {
               invokeType_ = bs;
               break;
             }
+            case 82: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+                tags_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000100;
+              }
+              tags_.add(bs);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -217,6 +246,9 @@ public final class RemoteInterfaceInfoProtobuf {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+          tags_ = tags_.getUnmodifiableView();
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -489,6 +521,35 @@ public final class RemoteInterfaceInfoProtobuf {
       }
     }
 
+    public static final int TAGS_FIELD_NUMBER = 10;
+    private com.google.protobuf.LazyStringList tags_;
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getTagsList() {
+      return tags_;
+    }
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    public int getTagsCount() {
+      return tags_.size();
+    }
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    public java.lang.String getTags(int index) {
+      return tags_.get(index);
+    }
+    /**
+     * <code>repeated string tags = 10;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTagsBytes(int index) {
+      return tags_.getByteString(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -557,6 +618,9 @@ public final class RemoteInterfaceInfoProtobuf {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, invokeType_);
       }
+      for (int i = 0; i < tags_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, tags_.getRaw(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -591,6 +655,14 @@ public final class RemoteInterfaceInfoProtobuf {
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, invokeType_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < tags_.size(); i++) {
+          dataSize += computeStringSizeNoTag(tags_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getTagsList().size();
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -648,6 +720,8 @@ public final class RemoteInterfaceInfoProtobuf {
         result = result && getInvokeType()
             .equals(other.getInvokeType());
       }
+      result = result && getTagsList()
+          .equals(other.getTagsList());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -690,6 +764,10 @@ public final class RemoteInterfaceInfoProtobuf {
       if (hasInvokeType()) {
         hash = (37 * hash) + INVOKETYPE_FIELD_NUMBER;
         hash = (53 * hash) + getInvokeType().hashCode();
+      }
+      if (getTagsCount() > 0) {
+        hash = (37 * hash) + TAGS_FIELD_NUMBER;
+        hash = (53 * hash) + getTagsList().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -836,6 +914,8 @@ public final class RemoteInterfaceInfoProtobuf {
         bitField0_ = (bitField0_ & ~0x00000040);
         invokeType_ = "";
         bitField0_ = (bitField0_ & ~0x00000080);
+        tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -892,6 +972,11 @@ public final class RemoteInterfaceInfoProtobuf {
           to_bitField0_ |= 0x00000080;
         }
         result.invokeType_ = invokeType_;
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          tags_ = tags_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000100);
+        }
+        result.tags_ = tags_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -966,6 +1051,16 @@ public final class RemoteInterfaceInfoProtobuf {
         if (other.hasInvokeType()) {
           bitField0_ |= 0x00000080;
           invokeType_ = other.invokeType_;
+          onChanged();
+        }
+        if (!other.tags_.isEmpty()) {
+          if (tags_.isEmpty()) {
+            tags_ = other.tags_;
+            bitField0_ = (bitField0_ & ~0x00000100);
+          } else {
+            ensureTagsIsMutable();
+            tags_.addAll(other.tags_);
+          }
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -1495,6 +1590,99 @@ public final class RemoteInterfaceInfoProtobuf {
         onChanged();
         return this;
       }
+
+      private com.google.protobuf.LazyStringList tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureTagsIsMutable() {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+          tags_ = new com.google.protobuf.LazyStringArrayList(tags_);
+          bitField0_ |= 0x00000100;
+         }
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getTagsList() {
+        return tags_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public int getTagsCount() {
+        return tags_.size();
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public java.lang.String getTags(int index) {
+        return tags_.get(index);
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTagsBytes(int index) {
+        return tags_.getByteString(index);
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public Builder setTags(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTagsIsMutable();
+        tags_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public Builder addTags(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTagsIsMutable();
+        tags_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public Builder addAllTags(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureTagsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, tags_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public Builder clearTags() {
+        tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tags = 10;</code>
+       */
+      public Builder addTagsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTagsIsMutable();
+        tags_.add(value);
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -1558,13 +1746,13 @@ public final class RemoteInterfaceInfoProtobuf {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\033remote_interface_info.proto\"\271\001\n\007Messag" +
+      "\n\033remote_interface_info.proto\"\307\001\n\007Messag" +
       "e\022\031\n\021interfaceFullName\030\001 \002(\t\022\017\n\007version\030" +
       "\003 \002(\005\022\022\n\nserviceURI\030\004 \002(\t\022\025\n\rinterfaceTy" +
       "pe\030\005 \002(\t\022\024\n\014healthStatus\030\006 \002(\005\022\024\n\014invoke" +
       "Weight\030\007 \002(\005\022\027\n\017serviceProvider\030\010 \002(\t\022\022\n" +
-      "\ninvokeType\030\t \002(\tB\035B\033RemoteInterfaceInfo" +
-      "Protobuf"
+      "\ninvokeType\030\t \002(\t\022\014\n\004tags\030\n \003(\tB\035B\033Remot" +
+      "eInterfaceInfoProtobuf"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1583,7 +1771,7 @@ public final class RemoteInterfaceInfoProtobuf {
     internal_static_Message_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Message_descriptor,
-        new java.lang.String[] { "InterfaceFullName", "Version", "ServiceURI", "InterfaceType", "HealthStatus", "InvokeWeight", "ServiceProvider", "InvokeType", });
+        new java.lang.String[] { "InterfaceFullName", "Version", "ServiceURI", "InterfaceType", "HealthStatus", "InvokeWeight", "ServiceProvider", "InvokeType", "Tags", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
