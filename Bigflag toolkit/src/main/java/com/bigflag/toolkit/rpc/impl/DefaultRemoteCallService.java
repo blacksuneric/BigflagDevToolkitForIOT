@@ -16,11 +16,13 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.zookeeper.server.quorum.SendAckRequestProcessor;
 import org.joda.time.DateTime;
 
 import com.bigflag.toolkit.exception.RPCServiceNotInitException;
+import com.bigflag.toolkit.ioc.ServiceFactory;
 import com.bigflag.toolkit.rpc.beans.BaseRPCConfig;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf;
 import com.bigflag.toolkit.rpc.beans.RPCMessageProtobuf.Message.Builder;
@@ -69,23 +71,45 @@ public class DefaultRemoteCallService implements IRemoteCallService {
 		Object obj = Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				
+				RemoteInterfaceInfoProtobuf.Message remoteService=getOneService(clazz.getName(), 1, null);
+				
+				String serviceURI=remoteService.getServiceURI();
+				
+				Builder builder = RPCMessageProtobuf.Message.newBuilder().setInterfaceFullName(clazz.getName()).setVersion(1)
+						.setMethodName(method.getName());
+//				for (Object arg : args) {
+//					builder.addMethodParameter(ByteString.copyFrom(objectToByteArray(arg)));
+//				}
+				byte[] sentRemoteInterfaceData = builder.build().toByteArray();
+				
+				byte[] resultData=ServiceFactory.getInstance().getDefaultHttpPostToolImpl().doPostBytes(serviceURI, sentRemoteInterfaceData);
+				
 				System.out.println("invoke " + method.getName() + " hello");
 				if (method.getReturnType().getTypeName().equals("int")) {
 					return 1;
 				} else if (method.getReturnType().getTypeName().equals(String.class.getTypeName())) {
-					return "asdf";
+					return new String(resultData).intern();
 				}
-				Builder builder = RPCMessageProtobuf.Message.newBuilder().setInterfaceFullName(clazz.getName()).setVersion(1)
-						.setMethodName(method.getName());
-				for (Object arg : args) {
-					builder.addMethodParameter(ByteString.copyFrom(objectToByteArray(arg)));
-				}
-				byte[] sentRemoteInterfaceData = builder.build().toByteArray();
+				
+				
 				throw new Exception("sdf");
 				// return "result returned";
 			}
 		});
 		return (T) obj;
+	}
+	
+	private RemoteInterfaceInfoProtobuf.Message getOneService(String fullInterfaceName, int version, List<String> tags)
+	{
+		List<RemoteInterfaceInfoProtobuf.Message> remoteServices=queryRemoteInterfaceInfo(fullInterfaceName, 1, null);
+		if(remoteServices.size()>0)
+		{
+			return remoteServices.get(0);
+		}else
+		{
+			return null;
+		}
 	}
 
 	/*
