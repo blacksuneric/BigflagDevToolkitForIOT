@@ -147,14 +147,14 @@ Coordination Service
 ---
 Currently, the default coordinate service is with zookeeper, again you can introduce your own easily as the framework is not using any zookeeper specific interfaces, in other words, the framework abstracted the zookeeper interfaces but still adopt the methodology of it.
 
-#### 1 connect to coordinate server
+####1 connect to coordinate server
 ```java
 String connectURI="host:port";
 int connectTimeout=30000;
 ICoordinatorToolService coService = ServiceFactory.getInstance().getDefaultCoordinatorToolService();
 coService.connectServer(new BaseCoordinatorConfigBean.Builder().connectUrl(connectURI).timeout(connectTimeout).build());
 ```
-#### 2.1 create ephemeral path
+####2.1 create ephemeral path
 This will create the ephemeral type path. If the coordinate client drop connection, the ephemeral path will be removed automatically. 
 ```java
 String nodePath="/testNode";
@@ -163,7 +163,7 @@ boolean isSequential=false;
 coService.createEphemeralPath(nodePath, nodeData, isSequential);
 ```
 
-#### 2.2 create persistent path
+####2.2 create persistent path
 This will create the persistent type path. The path will exist if the coordinate client drop connection.
 ```java
 String nodePath="/testNode";
@@ -172,7 +172,7 @@ boolean isSequential=false;
 coService.createPersistentPath(nodePath, nodeData, isSequential);
 ```
 
-#### 3 get the node data
+####3 get the node data
 if the second parameter is true, then the node will be repeatly watched. Everytime the data of the node get changed,
 then, the third lambda interface will be invoked.
 
@@ -182,12 +182,12 @@ byte[] firstData=coService.getNodeData("/testOne/testData", true, (eventType,pat
 		});
 ```
 
-#### 4 set the node data
+####4 set the node data
 ```java
 coService.setData("/testOne", DateTime.now().toLocalTime().toString().getBytes());
 ```
 
-#### 5 get the children of node
+####5 get the children of node
 if the second parameter is true, then the node children will be repeatly watched. Everytime the children of the node get changed,
 added or removed, the third lambda interface will be invoked.
 ```java
@@ -196,12 +196,12 @@ List<String> childNodes=coService.getNodeChildren("/testOne", true, (eventType,p
 		});
 ```
 
-#### 6 remove node
+####6 remove node
 ```java
 coService.removePath("/testOne");
 ```
 
-#### 7 check if node exists
+####7 check if node exists
 if the second parameter is true, then everytime to add or remove the node,
 the third lambda interface will be invoked.
 ```java
@@ -213,7 +213,64 @@ boolean isExists=coService.existNode("/testOne", true, (eventType,path,data)->{
 
 ESB
 ---
-WIP
+ESB, known as enterprise service bus is the central point to micro-services. This framework support ESB. 
+
+Currently, the default ESB service implementation is using zookeeper as the service publish center. You can use ESB service to publish your service to zookeeper, and consume the service over http post with pre-defined protobuf message through the ESB service.
+
+#### 1 publish servcie
+This is the method to publish your service. Once you published, you can consume it in other broker.
+```java
+String esbURL="host:port"; // the zookeeper host
+int connectionTimeout=3000;
+String serviceRootName="/bigflagService";
+
+RemoteInterfaceInfoProtobuf.Message interfaceInfo=RemoteInterfaceInfoProtobuf.Message.newBuilder()
+    	.setInterfaceFullName(TestRemoteService.class.getName())  //the service name
+		.setServiceProvider("serverOne")                          //the broker name
+		.setServiceURI("http://127.0.0.1:8888/ws/testPost")       //the service post url
+		.setInterfaceType("rest")                                 //the service connect type
+		.setInvokeType("post")                                    //the service connect method
+		.setVersion(1)                                            //the service version
+		.setInvokeWeight(100)                                     //the service invoke weight
+		.setHealthStatus(100)                                     //the healthy status
+		.addTags("goodTag")                                       //the service tag
+		.addTags("freshBuild")                                    //the service tag
+		.build();
+
+IRemoteCallService rcService=ServiceFactory.getInstance().getDefaultRemoteCallService();
+rcService.connectToESB(new BaseRPCConfig.Builder(serviceRootName).esbURL(esbURL).timeout(connectionTimeout).build());
+rcService.regiesterServiceToESB(interfaceInfo);
+```
+
+#### 2 consume the service
+This is the function to consume the published service, you just use the interface as the parameter 
+to input into buildStub() method, then the ESB service will use dynammically proxy to wrap the inteface
+and return you the remote call version of such service, then you can just use it as it is a local implementation.
+```java
+String esbURL="host:port"; // the zookeeper host
+int connectionTimeout=3000;
+String serviceRootName="/bigflagService";
+
+IRemoteCallService rcService=ServiceFactory.getInstance().getDefaultRemoteCallService();
+rcService.connectToESB(new BaseRPCConfig.Builder(serviceRootName).esbURL(esbURL).timeout(connectionTimeout).build());
+TestRemoteService testRemoteService=rcService.buildStub(TestRemoteService.class);
+
+String result=testRemoteService.sayHello("nice to meet you","eric");
+System.out.println("test ESB get:"+result);
+```
+
+#### 3 query the published service
+This is the method to query published service with service name, version number and tags.
+
+```java
+String esbURL="host:port"; // the zookeeper host
+int connectionTimeout=3000;
+String serviceRootName="/bigflagService";
+
+IRemoteCallService rcService=ServiceFactory.getInstance().getDefaultRemoteCallService();
+rcService.connectToESB(new BaseRPCConfig.Builder(serviceRootName).esbURL(esbURL).timeout(connectionTimeout).build());
+rcService.queryRemoteInterfaceInfo(TestRemoteService.class.getName(), 1, null);
+```
 
 DB Service
 ---
