@@ -21,7 +21,7 @@ ISocketTCPService socketTcpService=ServiceFactory.getInstance().getDefaultSocket
 IIOTHandlerCenter iotHandlerCenter=ServiceFactory.getInstance().getDefaultIOTHandlerCenter();
 socketTcpService.startToListenTCP(listenPort, (sessionID,data)->{
             // this is where you process the tcp incoming data
-    		iotHandlerCenter.processIOTData(sessionID,(byte[])data);
+        	iotHandlerCenter.processIOTData(sessionID,(byte[])data);
 		}, (socketSession)->{
             // this is where tcp session created
 			logger.info("socket session create:"+socketSession.getSessionID()+" sessionCount:"+socketTcpService.getAllSocketSessions().size());
@@ -145,7 +145,71 @@ httpToolService.startToPostBytes(new byte[]{11,22,33}).compressBytes(IHttpCompre
 ```
 Coordination Service
 ---
-WIP
+Currently, the default coordinate service is with zookeeper, again you can introduce your own easily as the framework is not using any zookeeper specific interfaces, in other words, the framework abstracted the zookeeper interfaces but still adopt the methodology of it.
+
+####1 connect to coordinate server
+```java
+String connectURI="host:port";
+int connectTimeout=30000;
+ICoordinatorToolService coService = ServiceFactory.getInstance().getDefaultCoordinatorToolService();
+coService.connectServer(new BaseCoordinatorConfigBean.Builder().connectUrl(connectURI).timeout(connectTimeout).build());
+```
+####2.1 create ephemeral path
+This will create the ephemeral type path. If the coordinate client drop connection, the ephemeral path will be removed automatically. 
+```java
+String nodePath="/testNode";
+byte[] nodeData="testData".getBytes();
+boolean isSequential=false;
+coService.createEphemeralPath(nodePath, nodeData, isSequential);
+```
+
+####2.2 create persistent path
+This will create the persistent type path. The path will exist if the coordinate client drop connection.
+```java
+String nodePath="/testNode";
+byte[] nodeData="testData".getBytes();
+boolean isSequential=false;
+coService.createPersistentPath(nodePath, nodeData, isSequential);
+```
+
+####3 get the node data
+if the second parameter is true, then the node will be repeatly watched. Everytime the data of the node get changed,
+then, the third lambda interface will be invoked.
+
+```java
+byte[] firstData=coService.getNodeData("/testOne/testData", true, (eventType,path,data)->{
+    		System.out.println("test getData "+eventType+" "+path+" "+new String(data));
+		});
+```
+
+####4 set the node data
+```java
+coService.setData("/testOne", DateTime.now().toLocalTime().toString().getBytes());
+```
+
+####5 get the children of node
+if the second parameter is true, then the node children will be repeatly watched. Everytime the children of the node get changed,
+added or removed, the third lambda interface will be invoked.
+```java
+List<String> childNodes=coService.getNodeChildren("/testOne", true, (eventType,path,nodes)->{
+    		System.out.println("test childNodes "+eventType+" "+path+" "+Arrays.toString(nodes.toArray()));
+		});
+```
+
+####6 remove node
+```java
+coService.removePath("/testOne");
+```
+
+####7 check if node exists
+if the second parameter is true, then everytime to add or remove the node,
+the third lambda interface will be invoked.
+```java
+boolean isExists=coService.existNode("/testOne", true, (eventType,path,data)->{
+			System.out.println("test exist "+eventType+" "+path);
+		});
+```
+
 
 ESB
 ---
