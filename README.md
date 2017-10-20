@@ -272,6 +272,10 @@ rcService.connectToESB(new BaseRPCConfig.Builder(serviceRootName).esbURL(esbURL)
 rcService.queryRemoteInterfaceInfo(TestRemoteService.class.getName(), 1, null);
 ```
 
+Configuration Service
+---
+WIP -- will be implemented with javascript as the runtime script to provide the dynamically configuration feature
+
 DB Service
 ---
 WIP
