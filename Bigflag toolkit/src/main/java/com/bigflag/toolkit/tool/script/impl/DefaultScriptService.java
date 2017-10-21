@@ -52,4 +52,5 @@ public class DefaultScriptService implements IScriptService {
 		engine.eval(scriptContent);
 		return ((Invocable) manager).invokeFunction(functionName);
 	}
+
 }

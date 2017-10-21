@@ -3,6 +3,8 @@
  */
 package com.bigflag.toolkit.config.interfaces;
 
+import com.bigflag.toolkit.tool.coordinator.interfaces.ICoordinatorToolService;
+
 /**
  * Copyright 2017-2027 the original author or authors.
  *
@@ -23,11 +25,11 @@ package com.bigflag.toolkit.config.interfaces;
  *         Create at: 2017年10月21日 下午2:51:23 
  */
 public interface IConfigService {
-	public boolean initConfigService();
+	public boolean initConfigService(ICoordinatorToolService coordinatorToolService);
 	public boolean watchConfig(String configKey,IHandleConfigValueChanged handleConfigValueChanged);
 	public String queryConfigContent(String configKey);
 	
 	public interface IHandleConfigValueChanged{
-		public void processConfigValueChanged(String configContent,Object ...inputValues);
+		public void processConfigValueChanged(String configContent);
 	}
 }
