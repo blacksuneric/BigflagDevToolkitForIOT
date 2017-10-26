@@ -17,6 +17,8 @@ import com.bigflag.toolkit.rpc.impl.DefaultRemoteCallService;
 import com.bigflag.toolkit.rpc.interfaces.IRemoteCallService;
 import com.bigflag.toolkit.tool.cache.impl.RedisCacheImpl;
 import com.bigflag.toolkit.tool.cache.interfaces.ICacheToolService;
+import com.bigflag.toolkit.tool.coordinator.impl.DefaultZooKeeperCoordinatorService;
+import com.bigflag.toolkit.tool.coordinator.interfaces.ICoordinatorToolService;
 import com.bigflag.toolkit.tool.http.impl.DefaultHttpPostToolImpl;
 import com.bigflag.toolkit.tool.http.interfaces.IHttpToolService;
 import com.bigflag.toolkit.tool.mq.impl.RabbitMQService;
@@ -60,6 +62,7 @@ public class ServiceFactory {
 	private final static IEncryptedCodeDeviceService defaultEncryptedCodeDeviceService=new DefaultEncryptedCodeDeviceService();
 	private final static IMongoDBService defaultMongoDBService=new MongoDBService();
 	private final static IRemoteCallService defaultRemoteCallService=new DefaultRemoteCallService();
+	private final static ICoordinatorToolService defaultCoordinatorToolService=new DefaultZooKeeperCoordinatorService();
 	
 	private ServiceFactory() {}
 	public static ServiceFactory getInstance() {
@@ -236,5 +239,10 @@ public class ServiceFactory {
 	public IRemoteCallService getDefaultRemoteCallService()
 	{
 		return defaultRemoteCallService;
+	}
+	
+	public ICoordinatorToolService getDefaultCoordinatorToolService()
+	{
+		return defaultCoordinatorToolService;
 	}
 }
